@@ -11,7 +11,16 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+func MustInit(i Initializer) {
+	err := i.Init()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
+	MustInit(fsSprites)
+
 	// Create an instance of the app structure
 	app := NewApp()
 
