@@ -5,15 +5,16 @@ import (
 	"path/filepath"
 )
 
-const spritesDirPath = "./frontend/src/assets/images/sprites"
-
-var fsSprites = NewFileSystem(spritesDirPath)
+var (
+	fsSprites       = NewFileSystem(spritesDirPath)
+	fsModdedSprites = NewFileSystem(moddedSpritesDirPath)
+)
 
 func NewDir(path string) *Dir {
 	return &Dir{
-		Path:  path,
-		Dirs:  []Dir{},
-		Files: []File{},
+		Path:    path,
+		Dirs:    []Dir{},
+		Sprites: []Sprite{},
 	}
 }
 
@@ -36,8 +37,39 @@ func (fs *FileSystem) EnsureAbsPath() error {
 	return nil
 }
 
-func (fs FileSystem) Tree() (Dir, error) {
+func (fs FileSystem) Dir() (Dir, error) {
 	return traverseDir(fs.RootPath)
+}
+
+func NewTree(path string) *Tree {
+	return &Tree{
+		Path:     path,
+		Sprites:  []Sprite{},
+		Children: make(map[string]Tree),
+	}
+}
+
+func (fs FileSystem) Tree() (Tree, error) {
+	dir, err := fs.Dir()
+	if err != nil {
+		return Tree{}, err
+	}
+	return makeTree(dir)
+}
+
+func makeTree(dir Dir) (Tree, error) {
+	var result = NewTree(dir.Path)
+	result.Sprites = dir.Sprites
+
+	for _, dir := range dir.Dirs {
+		tree, err := makeTree(dir)
+		if err != nil {
+			return Tree{}, err
+		}
+		result.Children[filepath.Base(dir.Path)] = tree
+	}
+
+	return *result, nil
 }
 
 func traverseDir(dirPath string) (Dir, error) {
@@ -58,9 +90,12 @@ func traverseDir(dirPath string) (Dir, error) {
 
 			result.Dirs = append(result.Dirs, dir)
 		} else {
-			result.Files = append(result.Files, File{
-				Path: path,
-			})
+			sprite, err := toSprite(path)
+			if err != nil {
+				continue
+			}
+
+			result.Sprites = append(result.Sprites, sprite)
 		}
 	}
 

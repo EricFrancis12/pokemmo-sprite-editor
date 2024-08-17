@@ -20,7 +20,14 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
-func (a *App) StritesTree() (Dir, error) {
+func (a *App) SpritesDir() (Dir, error) {
+	return fsSprites.Dir()
+}
+
+func (a *App) SpritesTree() (Tree, error) {
 	return fsSprites.Tree()
+}
+
+func (a *App) SpritePath(s Sprite) string {
+	return s.Path()
 }

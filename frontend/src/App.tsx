@@ -1,68 +1,81 @@
-import React, { useState, useEffect, useRef } from "react";
-import { StritesTree } from "../wailsjs/go/main/App";
-import importImage from "./imageLoader";
+import React, { useState, useEffect } from "react";
+import { SpritesTree, SpritePath } from "../wailsjs/go/main/App";
+import { importImage } from "./lib/utils";
 import { main } from "../wailsjs/go/models";
 import usePagination from "./hooks/usePagination";
 
-const CARDS_PER_PAGE = 10;
+const CARDS_PER_PAGE = 16;
 
 export default function App() {
-    const [spritesDir, setSpritesDir] = useState<main.Dir | null>(null);
-    const { Pagination, itemsOnCurrentPage } = usePagination(spritesDir?.dirs ?? [], CARDS_PER_PAGE);
+    const [spritesTree, setSpritesTree] = useState<main.Tree | null>(null);
+
+    const [dirName, setDirName] = useState<string | null>(null);
+    const { Pagination, itemsOnCurrentPage } = usePagination(
+        dirName ? spritesTree?.children[dirName]?.sprites ?? [] : [],
+        CARDS_PER_PAGE
+    );
+
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        StritesTree().then(sd => {
-            setSpritesDir(sd);
+        SpritesTree().then(tree => {
+            console.log(tree);
+            setSpritesTree(tree);
+            setDirName(Object.keys(tree.children)[0] ?? null);
         });
     }, []);
 
     return (
-        <div>
-            {itemsOnCurrentPage
-                .filter((_, index) => index === 0)
-                .map((dir, index) => (
-                    <div key={index} className="w-full my-4 bg-blue-200">
-                        <Dir dir={dir} />
-                    </div>
-                ))}
-            <Pagination />
-        </div>
-    );
-}
-
-const DIRS_PER_PAGE = 20;
-
-function Dir({ dir }: {
-    dir: main.Dir;
-}) {
-    const { Pagination, itemsOnCurrentPage } = usePagination(dir.files, DIRS_PER_PAGE);
-
-    return (
         <>
-            <div className="grid grid-cols-4 w-full">
-                {itemsOnCurrentPage.map((file, index) => (
-                    <div key={index} className="m-2 bg-green-200">
-                        <DynamicImage path={file.path} />
+            <div className="flex justify-center items-center gap-4 h-[50px] w-full bg-purple-200">
+                {spritesTree && Object.keys(spritesTree.children).map((_dirName, index) => (
+                    <div
+                        key={index}
+                        className={(_dirName === dirName ? "bg-purple-300" : "bg-white") + " p-2 rounded cursor-pointer"}
+                        onClick={() => setDirName(_dirName)}
+                    >
+                        {_dirName}
                     </div>
                 ))}
             </div>
+            <div className="grid grid-cols-4 w-full">
+                {itemsOnCurrentPage
+                    // TODO:
+                    // .filter(sprite => searchQuery && sprite.name.includes(searchQuery))
+                    .map((sprite, index) => (
+                        <div key={index} className="w-full my-4 bg-blue-200">
+                            <div className="m-2 bg-green-200">
+                                <DynamicSprite sprite={sprite} />
+                            </div>
+                        </div>
+                    ))}
+            </div>
             <Pagination />
         </>
+    );
+}
+
+function DynamicSprite({ sprite }: {
+    sprite: main.Sprite;
+}) {
+    const [path, setPath] = useState(sprite.origPath);
+
+    useEffect(() => {
+        SpritePath(sprite).then(setPath);
+    }, [sprite]);
+
+    return (
+        <DynamicImage path={path} />
     )
 }
 
 function DynamicImage({ path }: {
     path: string;
 }) {
-    const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        const loadImage = async () => {
-            const url = await importImage(formatFileAbsPath(path));
-            setImageUrl(url);
-        };
-
-        loadImage();
+        importImage(formatFileAbsPath(path)).then(setImageUrl);
     }, [path]);
 
     if (!imageUrl) {

@@ -20,6 +20,7 @@ func MustInit(i Initializer) {
 
 func main() {
 	MustInit(fsSprites)
+	MustInit(fsModdedSprites)
 
 	// Create an instance of the app structure
 	app := NewApp()
