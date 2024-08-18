@@ -1,3 +1,4 @@
+import { main } from "../../wailsjs/go/models";
 
 
 export enum ESpriteType {
@@ -29,3 +30,18 @@ export enum EFacing {
     front = "front",
     back = "back",
 }
+
+export type TSpritesMap = {
+    [key: string]: main.Sprite[];
+};
+
+export enum EActionMenuType {
+    spritesMapEditor = "sprites-map-editor",
+}
+
+export type TActionMenu_spritesMapEditor = {
+    type: EActionMenuType.spritesMapEditor;
+    sprites: main.Sprite[];
+}
+
+export type TActionMenu = TActionMenu_spritesMapEditor;
