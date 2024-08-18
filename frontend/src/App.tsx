@@ -1,54 +1,93 @@
 import React, { useState, useEffect } from "react";
 import { SpritesTree, SpritePath } from "../wailsjs/go/main/App";
-import { importImage } from "./lib/utils";
+import { importImage, makeSortTypeFunc, nameFromId, spriteFacing, spriteFrame, spriteGender, spriteIsShiny } from "./lib/utils";
 import { main } from "../wailsjs/go/models";
 import usePagination from "./hooks/usePagination";
+import { ESortType, ESpriteType } from "./lib/types";
 
-const CARDS_PER_PAGE = 16;
+const CARDS_PER_PAGE = 8;
 
 export default function App() {
     const [spritesTree, setSpritesTree] = useState<main.Tree | null>(null);
 
-    const [dirName, setDirName] = useState<string | null>(null);
-    const { Pagination, itemsOnCurrentPage } = usePagination(
-        dirName ? spritesTree?.children[dirName]?.sprites ?? [] : [],
+    const [spriteType, setSpriteType] = useState<ESpriteType>(ESpriteType.battlesprites);
+    const [query, setQuery] = useState("");
+    const [sortType, setSortType] = useState<ESortType>(ESortType.idDesc);
+
+    const ids = spriteType
+        ? Object.keys(spritesTree?.children[spriteType]?.spritesMap ?? {})
+            .filter(id => spriteType && query
+                ? nameFromId(id, spriteType).toLowerCase().includes(query.toLowerCase())
+                : true
+            ) ?? []
+        : [];
+
+    const { Pagination, itemsOnCurrentPage, setCurrentPage } = usePagination(
+        ids.toSorted(makeSortTypeFunc(sortType, spriteType)),
         CARDS_PER_PAGE
     );
-
-    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         SpritesTree().then(tree => {
             console.log(tree);
             setSpritesTree(tree);
-            setDirName(Object.keys(tree.children)[0] ?? null);
+            setSpriteType(Object.keys(tree.children)[0] as ESpriteType ?? null);
         });
     }, []);
+
+    function handleClick(_spriteType: ESpriteType) {
+        setSpriteType(_spriteType);
+        setCurrentPage(1);
+    }
 
     return (
         <>
             <div className="flex justify-center items-center gap-4 h-[50px] w-full bg-purple-200">
-                {spritesTree && Object.keys(spritesTree.children).map((_dirName, index) => (
+                {spritesTree && Object.keys(spritesTree.children).map((_spriteType, index) => (
                     <div
                         key={index}
-                        className={(_dirName === dirName ? "bg-purple-300" : "bg-white") + " p-2 rounded cursor-pointer"}
-                        onClick={() => setDirName(_dirName)}
+                        className={(_spriteType === spriteType ? "bg-purple-300" : "bg-white") + " p-2 rounded cursor-pointer"}
+                        onClick={() => handleClick(_spriteType as ESpriteType)}
                     >
-                        {_dirName}
+                        {_spriteType}
                     </div>
                 ))}
+                <input
+                    placeholder="Search"
+                    className="px-2 py-1 rounded"
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                />
+                <select
+                    className="px-2 py-1 rounded"
+                    value={sortType}
+                    onChange={e => setSortType(e.target.value as ESortType)}
+                >
+                    {Object.values(ESortType).map((_sortType, index) => (
+                        <option key={index}>
+                            {_sortType}
+                        </option>
+                    ))}
+                </select>
             </div>
             <div className="grid grid-cols-4 w-full">
-                {itemsOnCurrentPage
-                    // TODO:
-                    // .filter(sprite => searchQuery && sprite.name.includes(searchQuery))
-                    .map((sprite, index) => (
-                        <div key={index} className="w-full my-4 bg-blue-200">
+                {itemsOnCurrentPage.map((id, index) => {
+                    const sprites = spriteType ? (spritesTree?.children[spriteType]?.spritesMap[id] ?? []) : [];
+                    return (
+                        <div
+                            key={index}
+                            className="my-4 bg-blue-200"
+                        >
                             <div className="m-2 bg-green-200">
-                                <DynamicSprite sprite={sprite} />
+                                {sprites.map((sprite, _index) => {
+                                    return _index === sprites.length - 1
+                                        ? <DynamicSprite key={_index} sprite={sprite} />
+                                        : null
+                                })}
                             </div>
                         </div>
-                    ))}
+                    )
+                })}
             </div>
             <Pagination />
         </>
@@ -65,7 +104,13 @@ function DynamicSprite({ sprite }: {
     }, [sprite]);
 
     return (
-        <DynamicImage path={path} />
+        <>
+            <DynamicImage path={path} />
+            <div>Gender: {spriteGender(sprite)}</div>
+            <div>Shiny: {`${spriteIsShiny(sprite)}`}</div>
+            <div>Facing: {spriteFacing(sprite)}</div>
+            <div>Frame: {`${spriteFrame(sprite)}`}</div>
+        </>
     )
 }
 

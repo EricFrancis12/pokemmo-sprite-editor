@@ -16,9 +16,10 @@ type Dir struct {
 }
 
 type Tree struct {
-	Path     string          `json:"path"`
-	Sprites  []Sprite        `json:"sprites"`
-	Children map[string]Tree `json:"children"`
+	SpriteType SpriteType          `json:"spriteType"`
+	Path       string              `json:"path"`
+	SpritesMap map[string][]Sprite `json:"spritesMap"`
+	Children   map[string]Tree     `json:"children"`
 }
 
 type FileSystem struct {
@@ -30,13 +31,14 @@ const (
 	DirNameModdedSprites string = "modded-sprites"
 )
 
-type Gender string
-
 const FileExtPng string = "png"
+
+type Gender string
 
 const (
 	GenderFemale Gender = "f"
 	GenderMale   Gender = "m"
+	GenderBoth   Gender = "b"
 )
 
 const (

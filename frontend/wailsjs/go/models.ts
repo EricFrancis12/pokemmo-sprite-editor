@@ -50,8 +50,9 @@ export namespace main {
 	}
 	
 	export class Tree {
+	    spriteType: string;
 	    path: string;
-	    sprites: Sprite[];
+	    spritesMap: {[key: string]: Sprite[]};
 	    children: {[key: string]: Tree};
 	
 	    static createFrom(source: any = {}) {
@@ -60,8 +61,9 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.spriteType = source["spriteType"];
 	        this.path = source["path"];
-	        this.sprites = this.convertValues(source["sprites"], Sprite);
+	        this.spritesMap = source["spritesMap"];
 	        this.children = this.convertValues(source["children"], Tree, true);
 	    }
 	

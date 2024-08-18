@@ -41,11 +41,12 @@ func (fs FileSystem) Dir() (Dir, error) {
 	return traverseDir(fs.RootPath)
 }
 
-func NewTree(path string) *Tree {
+func NewTree(path string, st SpriteType) *Tree {
 	return &Tree{
-		Path:     path,
-		Sprites:  []Sprite{},
-		Children: make(map[string]Tree),
+		SpriteType: st,
+		Path:       path,
+		SpritesMap: make(map[string][]Sprite),
+		Children:   make(map[string]Tree),
 	}
 }
 
@@ -58,15 +59,34 @@ func (fs FileSystem) Tree() (Tree, error) {
 }
 
 func makeTree(dir Dir) (Tree, error) {
-	var result = NewTree(dir.Path)
-	result.Sprites = dir.Sprites
+	st, err := DirPathToSpriteType(dir.Path)
+	if err != nil {
+		return Tree{}, err
+	}
+
+	var result = NewTree(dir.Path, *st)
+
+	for _, sprite := range dir.Sprites {
+		id, err := sprite.ID()
+		if err != nil {
+			return Tree{}, err
+		}
+
+		_, ok := result.SpritesMap[id]
+		if !ok {
+			result.SpritesMap[id] = []Sprite{sprite}
+		} else {
+			result.SpritesMap[id] = append(result.SpritesMap[id], sprite)
+		}
+	}
 
 	for _, dir := range dir.Dirs {
 		tree, err := makeTree(dir)
 		if err != nil {
 			return Tree{}, err
 		}
-		result.Children[filepath.Base(dir.Path)] = tree
+		base := filepath.Base(dir.Path)
+		result.Children[base] = tree
 	}
 
 	return *result, nil

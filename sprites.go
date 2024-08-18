@@ -19,24 +19,21 @@ func (s Sprite) Path() string {
 	return s.OrigPath
 }
 
-func errNotYetImplimented() error {
-	return fmt.Errorf("this feature is not yet implimented")
-}
+func (s Sprite) ID() (string, error) {
+	base := filepath.Base(s.OrigPath)
 
-func (s Sprite) ID() (int, error) {
-	// TODO: ...
-	return 0, errNotYetImplimented()
-}
-
-func (s Sprite) Gender() (*Gender, error) {
-	// TODO: ...
-	switch s.SpriteType {
-	case SpriteTypeBattlesprites:
-	case SpriteTypeFollowSprites:
-	case SpriteTypeItemIcons:
-	case SpriteTypeMonsterIcons:
+	splitOnDot := strings.Split(base, ".")
+	if ln := len(splitOnDot); ln < 2 {
+		return "", fmt.Errorf("expected length or at least 2, but got %d for %s", ln, base)
 	}
-	return nil, errNotYetImplimented()
+
+	parts := strings.Split(splitOnDot[0], "-")
+	if ln := len(parts); ln < 1 {
+		return "", fmt.Errorf("expected length of at least 1, but got %d for %s", ln, splitOnDot[0])
+	}
+
+	id := parts[0]
+	return id, nil
 }
 
 func isSprite(filePath string) (bool, error) {
