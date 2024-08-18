@@ -1,44 +1,62 @@
-import React, { useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { TActionMenu, TActionMenu_spritesMapEditor } from "../../../lib/types";
 import ActionMenuBodyWrapper from "../ActionMenuBodyWrapper";
 import { DynamicSprite } from "../../../views/ListPage";
 import { main } from "../../../../wailsjs/go/models";
-import { ProcessPng, SpritesTree } from "../../../../wailsjs/go/main/App";
+import { ProcessPng } from "../../../../wailsjs/go/main/App";
 import { spriteModdedPath } from "../../../lib/utils";
+import { useDataContext } from "../../../contexts/DataContext";
 
 enum EEditMode {
-    single = "single",
     all = "all",
+    single = "single",
 }
 
-interface IColorData {
-    hue: number;
-    saturation: number;
-    // TODO: ...
-}
+type SpriteWithColorData = main.Sprite & main.ImageData;
 
-type SpriteWithColorData = main.Sprite & IColorData;
+const initialColorData: main.ImageData = {
+    hue: 0,
+    saturation: 0,
+};
 
 function initialSpritesColorData(sprites: main.Sprite[]): SpriteWithColorData[] {
-    return sprites.map(sprite => ({ ...sprite, hue: 120, saturation: 120 }));
+    return sprites.map(sprite => ({ ...sprite, ...initialColorData })) as SpriteWithColorData[];
 }
 
 export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
     actionMenu: TActionMenu_spritesMapEditor;
     setActionMenu: React.Dispatch<React.SetStateAction<TActionMenu | null>>;
 }) {
-    const [editMode, setEditMode] = useState<EEditMode>(EEditMode.all);
+    const { fetchData } = useDataContext();
 
-    const [colorData, setColorData] = useState<IColorData>({ hue: 100, saturation: 100 });
+    const [editMode, setEditMode] = useState<EEditMode>(EEditMode.all);
+    const [colorData, setColorData] = useState<main.ImageData>(initialColorData);
+
     const [spritesWithColorData, setSpritesWithColorData] = useState<SpriteWithColorData[]>(
         initialSpritesColorData(actionMenu.sprites)
     );
 
-    function handleApply() {
-        // TODO: ...
-        if (actionMenu.sprites[0]) {
-            ProcessPng(actionMenu.sprites[0].origPath, spriteModdedPath(actionMenu.sprites[0]), colorData);
-        }
+    useEffect(() => {
+        console.log(actionMenu.sprites.length);
+    }, [actionMenu.sprites.length]);
+
+    function handleApplyAll() {
+        if (editMode !== EEditMode.all) return;
+        const proms = actionMenu.sprites.map(sprite => ProcessPng(sprite.origPath, spriteModdedPath(sprite), colorData));
+        Promise.all(proms).catch(console.error);
+
+        // .then(() => {
+        //     fetchData().then(() => setColorData(initialColorData));
+        // });
+    }
+
+    function handleApplySingle(_spriteWithColorData: SpriteWithColorData) {
+        if (editMode !== EEditMode.single) return;
+        ProcessPng(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), colorData)
+            .catch(console.error);
+        // .then(() => {
+        //     fetchData().then(() => setSpritesWithColorData(initialSpritesColorData(actionMenu.sprites)));
+        // });
     }
 
     return (
@@ -56,29 +74,39 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
                         </div>
                     ))}
                     {editMode === EEditMode.all &&
-                        <ColorEditor
-                            colorData={colorData}
-                            onChange={setColorData}
-                        />
+                        <>
+                            <ColorEditor
+                                colorData={colorData}
+                                onChange={setColorData}
+                            />
+                            <button
+                                className="px-2 py-1 rounded bg-green-300"
+                                onClick={handleApplyAll}
+                            >
+                                Apply
+                            </button>
+                        </>
                     }
-                    <button
-                        className="px-2 py-1 rounded bg-green-300"
-                        onClick={handleApply}
-                    >
-                        Apply
-                    </button>
                 </div>
-                <div className="grid grid-cols-4 w-full">
+                <div className="grid grid-cols-2 w-full">
                     {spritesWithColorData.map((spriteWithColorData, index) => (
                         <div key={index}>
                             <DynamicSprite sprite={spriteWithColorData} />
                             {editMode === EEditMode.single &&
-                                <ColorEditor
-                                    colorData={spriteWithColorData}
-                                    onChange={newSpriteWithColorData => setSpritesWithColorData(
-                                        prev => prev.map((s, i) => i === index ? { ...s, ...newSpriteWithColorData } : s)
-                                    )}
-                                />
+                                <>
+                                    <ColorEditor
+                                        colorData={spriteWithColorData}
+                                        onChange={imageData => setSpritesWithColorData(
+                                            prev => prev.map((s, i) => i === index ? { ...s, ...imageData } as SpriteWithColorData : s)
+                                        )}
+                                    />
+                                    <button
+                                        className="px-2 py-1 rounded bg-green-300"
+                                        onClick={() => handleApplySingle(spriteWithColorData)}
+                                    >
+                                        Apply
+                                    </button>
+                                </>
                             }
                         </div>
                     ))}
@@ -89,12 +117,77 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
 }
 
 function ColorEditor({ colorData, onChange }: {
-    colorData: IColorData;
-    onChange: (newColorData: IColorData) => void;
+    colorData: main.ImageData;
+    onChange: (newColorData: main.ImageData) => void;
 }) {
     return (
-        <div>
-            ColorEditor
+        <div className="flex flex-col gap-2">
+            <ColorEditorRow
+                title="Hue"
+                value={colorData.hue}
+            >
+                <RangeSlider
+                    value={colorData.hue}
+                    onChange={(hue: number) => onChange({ ...colorData, hue })}
+                    min={-360}
+                    max={360}
+                    step={1}
+                />
+            </ColorEditorRow>
+            <ColorEditorRow
+                title="Saturation"
+                value={colorData.saturation}
+            >
+                <RangeSlider
+                    value={colorData.saturation}
+                    onChange={(saturation: number) => onChange({ ...colorData, saturation })}
+                    min={-1}
+                    max={1}
+                    step={0.1}
+                />
+            </ColorEditorRow>
         </div>
+    )
+}
+
+function ColorEditorRow({ value, children, title }: {
+    value: number;
+    children: ReactNode;
+    title: string;
+}) {
+    return (
+        <div className="flex items-center gap-3 h-full">
+            <div className="w-[20px]">{value}</div>
+            {children}
+            <span>{title}</span>
+        </div>
+    )
+}
+
+
+function RangeSlider({ value, onChange, min, max, step, className, style }: {
+    value: number;
+    onChange: (n: number) => void;
+    min: number;
+    max: number;
+    step: number;
+    className?: string;
+    style?: React.CSSProperties;
+}) {
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const n = parseFloat(e.target.value);
+        if (!isNaN(n)) onChange(n);
+    }
+
+    return (
+        <input
+            type="range"
+            className={className} style={style}
+            step={step}
+            min={min}
+            max={max}
+            value={value}
+            onChange={handleChange}
+        />
     )
 }

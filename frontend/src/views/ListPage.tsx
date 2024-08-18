@@ -8,11 +8,12 @@ import { main } from "../../wailsjs/go/models";
 import usePagination from "../hooks/usePagination";
 import { EActionMenuType, ESortType, ESpriteType } from "../lib/types";
 import { ActionMenuProvider, useActionMenuContext } from "../contexts/ActionMenuContext";
+import { useDataContext } from "../contexts/DataContext";
 
 const CARDS_PER_PAGE = 8;
 
 export default function ListPage() {
-    const [spritesTree, setSpritesTree] = useState<main.Tree | null>(null);
+    const { spritesTree } = useDataContext();
 
     const [spriteType, setSpriteType] = useState<ESpriteType>(ESpriteType.battlesprites);
     const [query, setQuery] = useState("");
@@ -30,13 +31,6 @@ export default function ListPage() {
         ids.sort(makeSortTypeFunc(sortType, spriteType)),
         CARDS_PER_PAGE
     );
-
-    useEffect(() => {
-        SpritesTree().then(tree => {
-            setSpritesTree(tree);
-            setSpriteType(Object.keys(tree.children)[0] as ESpriteType ?? null);
-        });
-    }, []);
 
     function handleClick(_spriteType: ESpriteType) {
         setSpriteType(_spriteType);
@@ -128,7 +122,7 @@ export function DynamicSprite({ sprite }: {
 
     useEffect(() => {
         SpritePath(sprite).then(setPath);
-    }, [sprite]);
+    }, [sprite, sprite.origPath, sprite.spriteType]);
 
     return (
         <div>

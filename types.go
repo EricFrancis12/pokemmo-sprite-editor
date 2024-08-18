@@ -4,9 +4,15 @@ type Initializer interface {
 	Init() error
 }
 
+type ImageData struct {
+	Hue        int     `json:"hue"`
+	Saturation float64 `json:"saturation"`
+}
+
 type Sprite struct {
 	OrigPath   string     `json:"origPath"`
 	SpriteType SpriteType `json:"spriteType"`
+	ImageData  ImageData  `json:"imageData"`
 }
 
 type Dir struct {

@@ -7,11 +7,6 @@ import (
 	"github.com/anthonynsimon/bild/adjust"
 )
 
-type ImageData struct {
-	Hue        int     `json:"hue"`
-	Saturation float64 `json:"saturation"`
-}
-
 func ProcessPng(inputPath string, outputPath string, imageData ImageData) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
