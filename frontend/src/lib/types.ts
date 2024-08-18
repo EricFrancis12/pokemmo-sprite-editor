@@ -1,5 +1,9 @@
 import { main } from "../../wailsjs/go/models";
 
+export enum EDirName {
+    sprites = "sprites",
+    moddedSprites = "modded-sprites",
+}
 
 export enum ESpriteType {
     battlesprites = "battlesprites",

@@ -1,6 +1,10 @@
 import { main } from "../../wailsjs/go/models";
 import { itemsDict, pokemonDict } from "./constants";
-import { ESpriteType, EGender, EShiny, EFacing, ESortType } from "./types";
+import { ESpriteType, EGender, EShiny, EFacing, ESortType, EDirName } from "./types";
+
+export function spriteModdedPath(sprite: main.Sprite): string {
+    return sprite.origPath.replace(EDirName.sprites, EDirName.moddedSprites);
+}
 
 export async function importImage(path: string): Promise<string | null> {
     try {

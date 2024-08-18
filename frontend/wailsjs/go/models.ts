@@ -48,6 +48,20 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class ImageData {
+	    hue: number;
+	    saturation: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImageData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.hue = source["hue"];
+	        this.saturation = source["saturation"];
+	    }
+	}
 	
 	export class Tree {
 	    spriteType: string;

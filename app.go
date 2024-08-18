@@ -31,3 +31,7 @@ func (a *App) SpritesTree() (Tree, error) {
 func (a *App) SpritePath(s Sprite) string {
 	return s.Path()
 }
+
+func (a *App) ProcessPng(inputPath string, outputPath string, imageData ImageData) error {
+	return ProcessPng(inputPath, outputPath, imageData)
+}

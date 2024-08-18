@@ -33,7 +33,6 @@ export default function ListPage() {
 
     useEffect(() => {
         SpritesTree().then(tree => {
-            console.log(tree);
             setSpritesTree(tree);
             setSpriteType(Object.keys(tree.children)[0] as ESpriteType ?? null);
         });
@@ -122,7 +121,7 @@ function Sprites({ ids, spriteType, spritesTree }: {
     )
 }
 
-function DynamicSprite({ sprite }: {
+export function DynamicSprite({ sprite }: {
     sprite: main.Sprite;
 }) {
     const [path, setPath] = useState(sprite.origPath);
@@ -132,13 +131,13 @@ function DynamicSprite({ sprite }: {
     }, [sprite]);
 
     return (
-        <>
+        <div>
             <DynamicImage path={path} />
-            <div>Gender: {spriteGender(sprite)}</div>
+            {/* <div>Gender: {spriteGender(sprite)}</div>
             <div>Shiny: {`${spriteIsShiny(sprite)}`}</div>
             <div>Facing: {spriteFacing(sprite)}</div>
-            <div>Frame: {`${spriteFrame(sprite)}`}</div>
-        </>
+            <div>Frame: {`${spriteFrame(sprite)}`}</div> */}
+        </div>
     )
 }
 
