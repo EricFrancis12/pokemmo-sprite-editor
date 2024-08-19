@@ -56,16 +56,11 @@ func (a *App) ExportMod() error {
 		}
 	}()
 
-	wr, err := zw.Create(InfoXmlFileName())
-	if err != nil {
+	if err := writeToZipFile(zw, InfoXmlFileName(), NewInfoXml().Bytes()); err != nil {
 		return err
 	}
 
-	if _, err := wr.Write(NewInfoXml().Bytes()); err != nil {
-		return err
-	}
-
-	if err := ZipDirRecursively(zw, moddedSpritesDirPath, "sprites", filterExcludedEntries); err != nil {
+	if err := ZipDirRecursively(zw, moddedSpritesDirPath, DirNameSprites, filterExcludedEntries); err != nil {
 		return err
 	}
 

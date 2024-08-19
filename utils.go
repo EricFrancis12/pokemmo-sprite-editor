@@ -15,7 +15,7 @@ type EntryFilterFunc func(e fs.DirEntry) bool
 var (
 	fileNameExclustions                   = []string{FileNameGitignore}
 	filterExcludedEntries EntryFilterFunc = func(e fs.DirEntry) bool {
-		return sliceIncludes(fileNameExclustions, e.Name())
+		return !sliceIncludes(fileNameExclustions, e.Name())
 	}
 )
 
@@ -42,7 +42,7 @@ outerLoop:
 		} else {
 			splitOnSlash := strings.Split(sourceDirPath, "/")
 			last := splitOnSlash[len(splitOnSlash)-1]
-			err := writeToZipFile(zw, path, innerZipDirName+"/"+last)
+			err := copyToZipFile(zw, path, innerZipDirName+"/"+last)
 			if err != nil {
 				return err
 			}
@@ -52,7 +52,7 @@ outerLoop:
 	return nil
 }
 
-func writeToZipFile(zw *zip.Writer, sourceFilePath string, innerZipDirName string) error {
+func copyToZipFile(zw *zip.Writer, sourceFilePath string, innerZipDirName string) error {
 	file, err := os.Open(sourceFilePath)
 	if err != nil {
 		return err
@@ -64,6 +64,19 @@ func writeToZipFile(zw *zip.Writer, sourceFilePath string, innerZipDirName strin
 		return err
 	}
 	if _, err := io.Copy(wr, file); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func writeToZipFile(zw *zip.Writer, fileName string, data []byte) error {
+	wr, err := zw.Create(fileName)
+	if err != nil {
+		return err
+	}
+
+	if _, err := wr.Write(data); err != nil {
 		return err
 	}
 
