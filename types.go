@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Initializer interface {
 	Init() error
 }
@@ -32,12 +37,62 @@ type FileSystem struct {
 	RootPath string `json:"rootPath"`
 }
 
+type InfoXml struct {
+	Name        string
+	Version     string
+	Description string
+	Author      string
+	Weblink     string
+}
+
+func (ix InfoXml) String() string {
+	lines := []string{
+		fmt.Sprintf(
+			`<?xml version="%s" encoding="%s" standalone="%s"?>`,
+			XmlVersion,
+			XmlEncoding,
+			XmlStanalone,
+		),
+		fmt.Sprintf(
+			`<resource author="%s" description="%s" name="%s" version="%s" weblink="%s"/>`,
+			ix.Author,
+			ix.Description,
+			ix.Name,
+			ix.Version,
+			ix.Weblink,
+		),
+	}
+	return strings.Join(lines, "\n")
+}
+
+func (ix InfoXml) Bytes() []byte {
+	return []byte(ix.String())
+}
+
+const (
+	ApplicationAuthor      string = "https://github.com/EricFrancis12"
+	ApplicationDescription string = "yes"
+	ApplicationName        string = "PokeMMO Sprite Editor"
+	ApplicationVersion     string = "1.0"
+	ApplicationWeblink     string = "https://github.com/EricFrancis12/pokemmo-sprite-editor"
+)
+
 const (
 	DirNameSprites       string = "sprites"
 	DirNameModdedSprites string = "modded-sprites"
+	DirNameMod           string = "mod"
 )
 
-const FileExtPng string = "png"
+const (
+	FileExtGif string = "gif"
+	FileExtPng string = "png"
+	FileExtXml string = "xml"
+)
+
+const (
+	fileNameGitignore string = ".gitignore"
+	fileNameModZip    string = "mod.zip"
+)
 
 type Gender string
 

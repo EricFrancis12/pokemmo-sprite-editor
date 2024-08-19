@@ -1,7 +1,11 @@
 package main
 
 import (
+	"archive/zip"
 	"context"
+	"io/fs"
+	"os"
+	"path/filepath"
 )
 
 // App struct
@@ -34,4 +38,35 @@ func (a *App) SpritePath(s Sprite) string {
 
 func (a *App) ProcessPng(inputPath string, outputPath string, imageData ImageData) error {
 	return ProcessPng(inputPath, outputPath, imageData)
+}
+
+var excludeGitIgnore EntryFilterFunc = func(e fs.DirEntry) bool {
+	return e.Name() != fileNameGitignore
+}
+
+func (a *App) ExportMod() error {
+	outputPath := filepath.Join(modDirPath, fileNameModZip)
+	archive, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer archive.Close()
+
+	zw := zip.NewWriter(archive)
+	defer zw.Close()
+
+	wr, err := zw.Create(InfoXmlFileName())
+	if err != nil {
+		return err
+	}
+
+	if _, err := wr.Write(NewInfoXml().Bytes()); err != nil {
+		return err
+	}
+
+	if err := copyToZipRecursively(zw, moddedSpritesDirPath, outputPath, "sprites", excludeGitIgnore); err != nil {
+		return err
+	}
+
+	return nil
 }

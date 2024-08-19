@@ -19,6 +19,11 @@ export enum ESortType {
     idDesc = "idDesc",
 }
 
+export enum EEditMode {
+    all = "all",
+    single = "single",
+}
+
 export enum EGender {
     male = "m",
     female = "f",

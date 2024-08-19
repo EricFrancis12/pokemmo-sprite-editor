@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { SpritesTree, SpritePath } from "../../wailsjs/go/main/App";
-import {
-    importImage, makeSortTypeFunc, nameFromId,
-    spriteFacing, spriteFrame, spriteGender, spriteIsShiny
-} from "../lib/utils";
+import { ExportMod, SpritePath } from "../../wailsjs/go/main/App";
+import { importImage, makeSortTypeFunc, nameFromId } from "../lib/utils";
 import { main } from "../../wailsjs/go/models";
 import usePagination from "../hooks/usePagination";
 import { EActionMenuType, ESortType, ESpriteType } from "../lib/types";
@@ -37,6 +34,10 @@ export default function ListPage() {
         setCurrentPage(1);
     }
 
+    function handleExport() {
+        ExportMod();
+    }
+
     return (
         <ActionMenuProvider>
             <div className="flex justify-center items-center gap-4 h-[50px] w-full bg-purple-200">
@@ -66,6 +67,12 @@ export default function ListPage() {
                         </option>
                     ))}
                 </select>
+                <button
+                    className="px-3 py-2 bg-orange-300 rounded"
+                    onClick={handleExport}
+                >
+                    Export
+                </button>
             </div>
             {spritesTree &&
                 <Sprites

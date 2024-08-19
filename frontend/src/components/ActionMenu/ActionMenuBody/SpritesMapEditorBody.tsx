@@ -1,18 +1,17 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { TActionMenu, TActionMenu_spritesMapEditor } from "../../../lib/types";
 import ActionMenuBodyWrapper from "../ActionMenuBodyWrapper";
-import { DynamicSprite } from "../../../views/ListPage";
+import { DynamicSprite } from "../../../pages/ListPage";
 import { main } from "../../../../wailsjs/go/models";
 import { ProcessPng } from "../../../../wailsjs/go/main/App";
 import { spriteModdedPath } from "../../../lib/utils";
 import { useDataContext } from "../../../contexts/DataContext";
+import { EEditMode } from "../../../lib/types";
+import { useEditModeContext } from "../../../contexts/EditModeContext";
 
-enum EEditMode {
-    all = "all",
-    single = "single",
-}
-
-type SpriteWithColorData = main.Sprite & main.ImageData;
+type SpriteWithColorData = main.Sprite & {
+    wipImageData: main.ImageData;
+};
 
 const initialColorData: main.ImageData = {
     hue: 0,
@@ -20,7 +19,7 @@ const initialColorData: main.ImageData = {
 };
 
 function initialSpritesColorData(sprites: main.Sprite[]): SpriteWithColorData[] {
-    return sprites.map(sprite => ({ ...sprite, ...initialColorData })) as SpriteWithColorData[];
+    return sprites.map(sprite => ({ ...sprite, wipImageData: initialColorData })) as SpriteWithColorData[];
 }
 
 export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
@@ -28,35 +27,31 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
     setActionMenu: React.Dispatch<React.SetStateAction<TActionMenu | null>>;
 }) {
     const { fetchData } = useDataContext();
+    const { editMode, setEditMode } = useEditModeContext();
 
-    const [editMode, setEditMode] = useState<EEditMode>(EEditMode.all);
     const [colorData, setColorData] = useState<main.ImageData>(initialColorData);
 
     const [spritesWithColorData, setSpritesWithColorData] = useState<SpriteWithColorData[]>(
         initialSpritesColorData(actionMenu.sprites)
     );
 
-    useEffect(() => {
-        console.log(actionMenu.sprites.length);
-    }, [actionMenu.sprites.length]);
+    console.log(spritesWithColorData);
 
     function handleApplyAll() {
         if (editMode !== EEditMode.all) return;
         const proms = actionMenu.sprites.map(sprite => ProcessPng(sprite.origPath, spriteModdedPath(sprite), colorData));
-        Promise.all(proms).catch(console.error);
-
-        // .then(() => {
-        //     fetchData().then(() => setColorData(initialColorData));
-        // });
+        Promise.all(proms)
+            .then(() => {
+                fetchData().then(() => setColorData(initialColorData));
+            });
     }
 
     function handleApplySingle(_spriteWithColorData: SpriteWithColorData) {
         if (editMode !== EEditMode.single) return;
-        ProcessPng(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), colorData)
-            .catch(console.error);
-        // .then(() => {
-        //     fetchData().then(() => setSpritesWithColorData(initialSpritesColorData(actionMenu.sprites)));
-        // });
+        ProcessPng(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), _spriteWithColorData.wipImageData)
+            .then(() => {
+                fetchData().then(() => setSpritesWithColorData(initialSpritesColorData(actionMenu.sprites)));
+            });
     }
 
     return (
@@ -95,9 +90,9 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
                             {editMode === EEditMode.single &&
                                 <>
                                     <ColorEditor
-                                        colorData={spriteWithColorData}
+                                        colorData={spriteWithColorData.wipImageData}
                                         onChange={imageData => setSpritesWithColorData(
-                                            prev => prev.map((s, i) => i === index ? { ...s, ...imageData } as SpriteWithColorData : s)
+                                            prev => prev.map((s, i) => i === index ? { ...s, wipImageData: imageData } as SpriteWithColorData : s)
                                         )}
                                     />
                                     <button
