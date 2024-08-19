@@ -65,7 +65,7 @@ func (a *App) ExportMod() error {
 		return err
 	}
 
-	if ZipDirRecursively(zw, moddedSpritesDirPath, "sprites", filterExcludedEntries); err != nil {
+	if err := ZipDirRecursively(zw, moddedSpritesDirPath, "sprites", filterExcludedEntries); err != nil {
 		return err
 	}
 
