@@ -10,22 +10,6 @@ import (
 	"strings"
 )
 
-func ZipDirRecursively(inputDirPath string, outputPath string, innerZipDirName string) error {
-	archive, err := os.Create(outputPath)
-	if err != nil {
-		return err
-	}
-	defer archive.Close()
-
-	zw := zip.NewWriter(archive)
-
-	if err := copyToZipRecursively(zw, inputDirPath, outputPath, innerZipDirName); err != nil {
-		return err
-	}
-
-	return zw.Close()
-}
-
 type EntryFilterFunc func(e fs.DirEntry) bool
 
 func copyToZipRecursively(

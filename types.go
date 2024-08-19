@@ -91,7 +91,7 @@ const (
 
 const (
 	fileNameGitignore string = ".gitignore"
-	fileNameModZip    string = "mod.zip"
+	fileNameModZip    string = "pokemmo-sprite-editor.zip"
 )
 
 type Gender string
