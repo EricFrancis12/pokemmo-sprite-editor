@@ -12,48 +12,59 @@ import (
 
 type EntryFilterFunc func(e fs.DirEntry) bool
 
-func copyToZipRecursively(
-	zw *zip.Writer,
-	inputDirPath string,
-	outputDirPath string,
-	zipDirName string,
-	filters ...EntryFilterFunc,
-) error {
-	entries, err := os.ReadDir(inputDirPath)
+var (
+	fileNameExclustions                   = []string{FileNameGitignore}
+	filterExcludedEntries EntryFilterFunc = func(e fs.DirEntry) bool {
+		return sliceIncludes(fileNameExclustions, e.Name())
+	}
+)
+
+func ZipDirRecursively(zw *zip.Writer, sourceDirPath string, innerZipDirName string, filters ...EntryFilterFunc) error {
+	entries, err := os.ReadDir(sourceDirPath)
 	if err != nil {
 		return err
 	}
 
 outerLoop:
 	for _, entry := range entries {
-		for _, ok := range filters {
-			if !ok(entry) {
+		for _, filter := range filters {
+			if !filter(entry) {
 				continue outerLoop
 			}
 		}
 
-		var (
-			path             = filepath.Join(inputDirPath, entry.Name())
-			innerZipFilePath = filepath.Join(zipDirName, entry.Name())
-		)
-
-		if !entry.IsDir() {
-			file, err := os.Open(path)
+		path := sourceDirPath + "/" + entry.Name()
+		if entry.IsDir() {
+			err := ZipDirRecursively(zw, path, innerZipDirName, filters...)
 			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			wr, err := zw.Create(innerZipFilePath)
-			if err != nil {
-				return err
-			}
-			if _, err := io.Copy(wr, file); err != nil {
 				return err
 			}
 		} else {
-			return copyToZipRecursively(zw, path, outputDirPath, innerZipFilePath, filters...)
+			splitOnSlash := strings.Split(sourceDirPath, "/")
+			last := splitOnSlash[len(splitOnSlash)-1]
+			err := writeToZipFile(zw, path, innerZipDirName+"/"+last)
+			if err != nil {
+				return err
+			}
 		}
+	}
+
+	return nil
+}
+
+func writeToZipFile(zw *zip.Writer, sourceFilePath string, innerZipDirName string) error {
+	file, err := os.Open(sourceFilePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	wr, err := zw.Create(innerZipDirName + "/" + filepath.Base(file.Name()))
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(wr, file); err != nil {
+		return err
 	}
 
 	return nil
@@ -91,6 +102,15 @@ func Exists(path string) bool {
 func FileExt(fileName string) string {
 	parts := strings.Split(fileName, ".")
 	return parts[len(parts)-1]
+}
+
+func sliceIncludes[T comparable](slice []T, t T) bool {
+	for _, c := range slice {
+		if c == t {
+			return true
+		}
+	}
+	return false
 }
 
 func InfoXmlFileName() string {

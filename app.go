@@ -3,7 +3,7 @@ package main
 import (
 	"archive/zip"
 	"context"
-	"io/fs"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -40,12 +40,8 @@ func (a *App) ProcessPng(inputPath string, outputPath string, imageData ImageDat
 	return ProcessPng(inputPath, outputPath, imageData)
 }
 
-var excludeGitIgnore EntryFilterFunc = func(e fs.DirEntry) bool {
-	return e.Name() != fileNameGitignore
-}
-
 func (a *App) ExportMod() error {
-	outputPath := filepath.Join(modDirPath, fileNameModZip)
+	outputPath := filepath.Join(modDirPath, FileNameModZip)
 	archive, err := os.Create(outputPath)
 	if err != nil {
 		return err
@@ -53,7 +49,12 @@ func (a *App) ExportMod() error {
 	defer archive.Close()
 
 	zw := zip.NewWriter(archive)
-	defer zw.Close()
+	defer func() {
+		err := zw.Close()
+		if err != nil {
+			fmt.Printf("error closing zip writer: %s\n", err.Error())
+		}
+	}()
 
 	wr, err := zw.Create(InfoXmlFileName())
 	if err != nil {
@@ -64,7 +65,7 @@ func (a *App) ExportMod() error {
 		return err
 	}
 
-	if err := copyToZipRecursively(zw, moddedSpritesDirPath, outputPath, "sprites", excludeGitIgnore); err != nil {
+	if ZipDirRecursively(zw, moddedSpritesDirPath, "sprites", filterExcludedEntries); err != nil {
 		return err
 	}
 

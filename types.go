@@ -71,7 +71,7 @@ func (ix InfoXml) Bytes() []byte {
 
 const (
 	ApplicationAuthor      string = "https://github.com/EricFrancis12"
-	ApplicationDescription string = "yes"
+	ApplicationDescription string = "PokeMMO Sprite Editor"
 	ApplicationName        string = "PokeMMO Sprite Editor"
 	ApplicationVersion     string = "1.0"
 	ApplicationWeblink     string = "https://github.com/EricFrancis12/pokemmo-sprite-editor"
@@ -90,8 +90,8 @@ const (
 )
 
 const (
-	fileNameGitignore string = ".gitignore"
-	fileNameModZip    string = "pokemmo-sprite-editor.zip"
+	FileNameGitignore string = ".gitignore"
+	FileNameModZip    string = "pokemmo-sprite-editor.zip"
 )
 
 type Gender string
