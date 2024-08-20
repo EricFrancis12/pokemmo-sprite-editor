@@ -36,8 +36,14 @@ func (a *App) SpritePath(s Sprite) string {
 	return s.Path()
 }
 
-func (a *App) ProcessPng(inputPath string, outputPath string, imageData ImageData) error {
-	return ProcessPng(inputPath, outputPath, imageData)
+func (a *App) ProcessSpriteImage(inputPath string, outputPath string, imageData ImageData) error {
+	ext := FileExt(inputPath)
+	if ext == FileExtPng {
+		return ProcessPng(inputPath, outputPath, imageData)
+	} else if ext == FileExtGif {
+		return ProcessGif(inputPath, outputPath, imageData)
+	}
+	return fmt.Errorf("unknown file extension: %s", ext)
 }
 
 func (a *App) ExportMod() error {

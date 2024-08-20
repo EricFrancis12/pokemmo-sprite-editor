@@ -6,8 +6,8 @@ export function ExportMod() {
   return window['go']['main']['App']['ExportMod']();
 }
 
-export function ProcessPng(arg1, arg2, arg3) {
-  return window['go']['main']['App']['ProcessPng'](arg1, arg2, arg3);
+export function ProcessSpriteImage(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ProcessSpriteImage'](arg1, arg2, arg3);
 }
 
 export function SpritePath(arg1) {

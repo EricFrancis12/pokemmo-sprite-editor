@@ -3,7 +3,7 @@ import { TActionMenu, TActionMenu_spritesMapEditor } from "../../../lib/types";
 import ActionMenuBodyWrapper from "../ActionMenuBodyWrapper";
 import { DynamicSprite } from "../../../pages/ListPage";
 import { main } from "../../../../wailsjs/go/models";
-import { ProcessPng } from "../../../../wailsjs/go/main/App";
+import { ProcessSpriteImage } from "../../../../wailsjs/go/main/App";
 import { spriteModdedPath } from "../../../lib/utils";
 import { useDataContext } from "../../../contexts/DataContext";
 import { EEditMode } from "../../../lib/types";
@@ -39,7 +39,7 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
 
     function handleApplyAll() {
         if (editMode !== EEditMode.all) return;
-        const proms = actionMenu.sprites.map(sprite => ProcessPng(sprite.origPath, spriteModdedPath(sprite), colorData));
+        const proms = actionMenu.sprites.map(sprite => ProcessSpriteImage(sprite.origPath, spriteModdedPath(sprite), colorData));
         Promise.all(proms)
             .then(() => {
                 fetchData().then(() => setColorData(initialColorData));
@@ -48,7 +48,7 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
 
     function handleApplySingle(_spriteWithColorData: SpriteWithColorData) {
         if (editMode !== EEditMode.single) return;
-        ProcessPng(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), _spriteWithColorData.wipImageData)
+        ProcessSpriteImage(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), _spriteWithColorData.wipImageData)
             .then(() => {
                 fetchData().then(() => setSpritesWithColorData(initialSpritesColorData(actionMenu.sprites)));
             });
