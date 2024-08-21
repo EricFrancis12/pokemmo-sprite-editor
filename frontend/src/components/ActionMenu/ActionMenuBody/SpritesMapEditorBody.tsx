@@ -35,8 +35,6 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
         initialSpritesColorData(actionMenu.sprites)
     );
 
-    console.log(spritesWithColorData);
-
     function handleApplyAll() {
         if (editMode !== EEditMode.all) return;
         const proms = actionMenu.sprites.map(sprite => ProcessSpriteImage(sprite.origPath, spriteModdedPath(sprite), colorData));
