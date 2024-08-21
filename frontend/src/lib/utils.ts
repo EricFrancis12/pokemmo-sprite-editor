@@ -118,13 +118,13 @@ type SortTypeFunc = (a: string, b: string) => number;
 export function makeSortTypeFunc(sortType: ESortType, spriteType: ESpriteType): SortTypeFunc {
     switch (sortType) {
         case ESortType.nameAsc:
-            return (a: string, b: string) => nameFromId(a, spriteType) > nameFromId(b, spriteType) ? 1 : -1;
-        case ESortType.nameDesc:
             return (a: string, b: string) => nameFromId(a, spriteType) > nameFromId(b, spriteType) ? -1 : 1;
+        case ESortType.nameDesc:
+            return (a: string, b: string) => nameFromId(a, spriteType) > nameFromId(b, spriteType) ? 1 : -1;
         case ESortType.idAsc:
-            return (a: string, b: string) => a > b ? 1 : -1;
+            return (a: string, b: string) => parseInt(a) > parseInt(b) ? -1 : 1;
         case ESortType.idDesc:
-            return (a: string, b: string) => a > b ? -1 : 1;
+            return (a: string, b: string) => parseInt(a) > parseInt(b) ? 1 : -1;
     }
 }
 
