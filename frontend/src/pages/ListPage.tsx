@@ -134,10 +134,6 @@ export function DynamicSprite({ sprite }: {
     return (
         <div>
             <DynamicImage path={path} />
-            {/* <div>Gender: {spriteGender(sprite)}</div>
-            <div>Shiny: {`${spriteIsShiny(sprite)}`}</div>
-            <div>Facing: {spriteFacing(sprite)}</div>
-            <div>Frame: {`${spriteFrame(sprite)}`}</div> */}
         </div>
     )
 }
@@ -148,12 +144,12 @@ function DynamicImage({ path }: {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        importImage(formatFileAbsPath(path)).then(setImageUrl);
+        importImage(formatFileAbsPath(path)).then(image => setImageUrl(image instanceof Error ? image.message : image));
     }, [path]);
 
     if (!imageUrl) {
         return (
-            <div>Loading image...</div>
+            <div>{`${imageUrl}`}</div>
         )
     }
 

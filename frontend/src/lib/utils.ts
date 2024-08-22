@@ -6,12 +6,16 @@ export function spriteModdedPath(sprite: main.Sprite): string {
     return sprite.origPath.replace(EDirName.sprites, EDirName.moddedSprites);
 }
 
-export async function importImage(path: string): Promise<string | null> {
+export async function importImage(path: string): Promise<string | Error> {
     try {
         const image = await import(path);
-        return typeof image?.default === "string" ? image.default : null;
+        const t = typeof image?.default;
+        if (t !== "string") {
+            throw new Error(`expected string, but got ${t}`);
+        }
+        return image.default;
     } catch (err) {
-        return null;
+        return formatErr(err);
     }
 }
 
@@ -151,4 +155,10 @@ function itemiconsMatcher(id: string): string {
 
 function monstericonsMatcher(id: string): string {
     return pokemonDict[id] ?? "";
+}
+
+function formatErr(err: unknown): Error {
+    if (err instanceof Error) return err;
+    if (typeof err === "string") return new Error(err);
+    return new Error("unknown error");
 }
