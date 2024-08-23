@@ -1,10 +1,14 @@
 package main
 
+import "io/fs"
+
 const SpriteFileExt string = FileExtPng
 
+const fileMode fs.FileMode = fs.ModePerm
+
 const (
-	spritesDirPath       string = "./frontend/src/assets/images/" + DirNameSprites
-	moddedSpritesDirPath string = "./frontend/src/assets/images/" + DirNameModdedSprites
+	spritesDirPath       string = DirNameFrontend + "/" + DirNamePublic + "/" + DirNameSprites
+	moddedSpritesDirPath string = DirNameModdedSprites
 	modDirPath           string = DirNameMod
 )
 

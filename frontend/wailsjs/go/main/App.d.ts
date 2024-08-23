@@ -6,8 +6,6 @@ export function ExportMod():Promise<void>;
 
 export function ProcessSpriteImage(arg1:string,arg2:string,arg3:main.ImageData):Promise<void>;
 
-export function SpritePath(arg1:main.Sprite):Promise<string>;
-
 export function SpritesDir():Promise<main.Dir>;
 
 export function SpritesTree():Promise<main.Tree>;

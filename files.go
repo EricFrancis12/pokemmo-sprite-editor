@@ -45,7 +45,7 @@ func NewTree(path string, st SpriteType) *Tree {
 	return &Tree{
 		SpriteType: st,
 		Path:       path,
-		SpritesMap: make(map[string][]Sprite),
+		SpritesMap: make(SpritesMap),
 		Children:   make(map[string]Tree),
 	}
 }

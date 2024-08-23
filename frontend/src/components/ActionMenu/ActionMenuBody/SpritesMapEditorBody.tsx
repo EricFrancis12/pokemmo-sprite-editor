@@ -9,7 +9,7 @@ import { useDataContext } from "../../../contexts/DataContext";
 import { EEditMode } from "../../../lib/types";
 import { useEditModeContext } from "../../../contexts/EditModeContext";
 
-type SpriteWithColorData = main.Sprite & {
+export type SpriteWithColorData = main.Sprite & {
     wipImageData: main.ImageData;
 };
 
@@ -18,8 +18,12 @@ const initialColorData: main.ImageData = {
     saturation: 0,
 };
 
+export function toSpriteWithColorData(sprite: main.Sprite): SpriteWithColorData {
+    return { ...sprite, wipImageData: initialColorData } as SpriteWithColorData;
+}
+
 function initialSpritesColorData(sprites: main.Sprite[]): SpriteWithColorData[] {
-    return sprites.map(sprite => ({ ...sprite, wipImageData: initialColorData })) as SpriteWithColorData[];
+    return sprites.map(toSpriteWithColorData);
 }
 
 export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {

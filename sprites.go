@@ -7,18 +7,6 @@ import (
 	"strings"
 )
 
-func (s Sprite) ModdedPath() string {
-	return strings.Replace(s.OrigPath, DirNameSprites, DirNameModdedSprites, 1)
-}
-
-func (s Sprite) Path() string {
-	mp := s.ModdedPath()
-	if Exists(mp) {
-		return mp
-	}
-	return s.OrigPath
-}
-
 func (s Sprite) ID() (string, error) {
 	base := filepath.Base(s.OrigPath)
 
@@ -72,6 +60,14 @@ func toSprite(filePath string) (Sprite, error) {
 
 	return Sprite{
 		OrigPath:   filePath,
+		Url:        spritefilePathToUrl(filePath),
 		SpriteType: *st,
 	}, nil
+}
+
+func spritefilePathToUrl(filePath string) string {
+	url := strings.ReplaceAll(filePath, "\\", "/")
+	url = strings.Replace(url, DirNameSprites, DirNameModdedSprites, 1)
+	parts := strings.Split(url, DirNamePublic)
+	return parts[len(parts)-1]
 }

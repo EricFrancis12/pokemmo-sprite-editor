@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { ExportMod, SpritePath } from "../../wailsjs/go/main/App";
+import React, { useState, useEffect, useRef } from "react";
+import { ExportMod } from "../../wailsjs/go/main/App";
 import { importImage, makeSortTypeFunc, nameFromId } from "../lib/utils";
 import { main } from "../../wailsjs/go/models";
 import usePagination from "../hooks/usePagination";
 import { EActionMenuType, ESortType, ESpriteType } from "../lib/types";
 import { ActionMenuProvider, useActionMenuContext } from "../contexts/ActionMenuContext";
 import { useDataContext } from "../contexts/DataContext";
+import { SpriteWithColorData, toSpriteWithColorData } from "../components/ActionMenu/ActionMenuBody/SpritesMapEditorBody";
 
 const CARDS_PER_PAGE = 8;
 
@@ -98,10 +99,7 @@ function Sprites({ ids, spriteType, spritesTree }: {
             {ids.map((id, index) => {
                 const sprites = spriteType ? (spritesTree?.children[spriteType]?.spritesMap[id] ?? []) : [];
                 return (
-                    <div
-                        key={index}
-                        className="my-4 bg-blue-200"
-                    >
+                    <div key={index} className="my-4 bg-blue-200">
                         <div
                             className="m-2 bg-green-200 cursor-pointer"
                             onClick={() => setActionMenu({
@@ -125,45 +123,18 @@ function Sprites({ ids, spriteType, spritesTree }: {
 export function DynamicSprite({ sprite }: {
     sprite: main.Sprite;
 }) {
-    const [path, setPath] = useState(sprite.origPath);
+    // const [path, setPath] = useState(sprite.url);
+    const path = useRef(sprite.url)
 
-    useEffect(() => {
-        SpritePath(sprite).then(setPath);
-    }, [sprite, sprite.origPath, sprite.spriteType]);
-
-    return (
-        <div>
-            <DynamicImage path={path} />
-        </div>
-    )
-}
-
-function DynamicImage({ path }: {
-    path: string;
-}) {
-    const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        importImage(formatFileAbsPath(path)).then(image => setImageUrl(image instanceof Error ? image.message : image));
-    }, [path]);
-
-    if (!imageUrl) {
-        return (
-            <div>{`${imageUrl}`}</div>
-        )
-    }
+    fetch(sprite.url)
+        .then(res => res.blob())
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            // setPath(blobUrl);
+            path.current = blobUrl;
+        });
 
     return (
-        <img
-            src={imageUrl}
-            alt={path}
-        />
+        <img src={path.current} alt={path.current} />
     )
-}
-
-function formatFileAbsPath(absPath: string): string {
-    if (absPath.substring(0, 2) === "C:") {
-        return absPath.substring(2).replaceAll("\\", "/");
-    }
-    return absPath;
 }

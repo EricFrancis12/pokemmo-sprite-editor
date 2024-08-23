@@ -2,6 +2,10 @@ package main
 
 import (
 	"embed"
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -11,6 +15,34 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+type FileLoader struct {
+	http.Handler
+}
+
+func NewFileLoader() *FileLoader {
+	return &FileLoader{}
+}
+
+func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	requestedFilename := strings.TrimPrefix(req.URL.Path, "/")
+
+	fileData, err := os.ReadFile(requestedFilename)
+	if err != nil {
+		spritePath := strings.Replace(requestedFilename, DirNameModdedSprites, DirNameSprites, 1)
+		spritePath = DirNameFrontend + "/" + DirNameDist + "/" + spritePath
+
+		fd, err := os.ReadFile(spritePath)
+		if err != nil {
+			res.WriteHeader(http.StatusBadRequest)
+			res.Write([]byte(fmt.Sprintf("Could not load file %s", requestedFilename)))
+		} else {
+			fileData = fd
+		}
+	}
+
+	res.Write(fileData)
+}
+
 func MustInit(i Initializer) {
 	err := i.Init()
 	if err != nil {
@@ -19,8 +51,13 @@ func MustInit(i Initializer) {
 }
 
 func main() {
-	MustInit(fsSprites)
-	MustInit(fsModdedSprites)
+	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeBattlesprites.String(), fileMode)
+	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeFollowSprites.String(), fileMode)
+	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeItemIcons.String(), fileMode)
+	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeMonsterIcons.String(), fileMode)
+
+	// MustInit(fsSprites)
+	// MustInit(fsModdedSprites)
 
 	// Create an instance of the app structure
 	app := NewApp()
@@ -31,7 +68,8 @@ func main() {
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
-			Assets: assets,
+			Assets:  assets,
+			Handler: NewFileLoader(),
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,

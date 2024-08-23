@@ -10,10 +10,6 @@ export function ProcessSpriteImage(arg1, arg2, arg3) {
   return window['go']['main']['App']['ProcessSpriteImage'](arg1, arg2, arg3);
 }
 
-export function SpritePath(arg1) {
-  return window['go']['main']['App']['SpritePath'](arg1);
-}
-
 export function SpritesDir() {
   return window['go']['main']['App']['SpritesDir']();
 }

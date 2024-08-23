@@ -3,17 +3,21 @@ import { itemsDict, pokemonDict } from "./constants";
 import { ESpriteType, EGender, EShiny, EFacing, ESortType, EDirName } from "./types";
 
 export function spriteModdedPath(sprite: main.Sprite): string {
-    return sprite.origPath.replace(EDirName.sprites, EDirName.moddedSprites);
+    const parts = sprite.origPath
+        .replace(EDirName.sprites, EDirName.moddedSprites)
+        .replaceAll("\\", "/")
+        .split(EDirName.public);
+    return stripPrefix(parts[parts.length - 1] ?? "", "/");
 }
 
 export async function importImage(path: string): Promise<string | Error> {
     try {
         const image = await import(path);
-        const t = typeof image?.default;
-        if (t !== "string") {
-            throw new Error(`expected string, but got ${t}`);
+        const d = image?.default;
+        if (typeof d === "string") {
+            return d;
         }
-        return image.default;
+        throw new Error(`expected string, but got ${typeof d}`);
     } catch (err) {
         return formatErr(err);
     }
@@ -111,6 +115,19 @@ export function spriteFrame(sprite: main.Sprite): number | null {
 
 export function base(path: string): string {
     return path.split(/[/\\]/).pop() || "";
+}
+
+export function stripPrefix(str: string, prefix: string): string {
+    // Ensure the prefix and path end with and start with slashes respectively
+    const normalizedPrefix = prefix.endsWith("/") ? prefix : `${prefix}/`;
+    const normalizedPath = str.startsWith("/") ? str : `/${str}`;
+
+    // Check if the path starts with the prefix
+    if (normalizedPath.startsWith(normalizedPrefix)) {
+        return normalizedPath.substring(normalizedPrefix.length);
+    }
+
+    return str;
 }
 
 export function nameFromId(id: string, spriteType: ESpriteType): string {

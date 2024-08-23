@@ -32,10 +32,6 @@ func (a *App) SpritesTree() (Tree, error) {
 	return fsSprites.Tree()
 }
 
-func (a *App) SpritePath(s Sprite) string {
-	return s.Path()
-}
-
 func (a *App) ProcessSpriteImage(inputPath string, outputPath string, imageData ImageData) error {
 	ext := FileExt(inputPath)
 	if ext == FileExtPng {

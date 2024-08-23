@@ -14,23 +14,26 @@ type ImageData struct {
 	Saturation float64 `json:"saturation"`
 }
 
-type Sprite struct {
-	OrigPath   string     `json:"origPath"`
-	SpriteType SpriteType `json:"spriteType"`
-	ImageData  ImageData  `json:"imageData"`
-}
-
 type Dir struct {
 	Path    string   `json:"path"`
 	Sprites []Sprite `json:"sprites"`
 	Dirs    []Dir    `json:"dirs"`
 }
 
+type Sprite struct {
+	OrigPath   string     `json:"origPath"`
+	Url        string     `json:"url"`
+	SpriteType SpriteType `json:"spriteType"`
+	ImageData  ImageData  `json:"imageData"`
+}
+
+type SpritesMap = map[string][]Sprite
+
 type Tree struct {
-	SpriteType SpriteType          `json:"spriteType"`
-	Path       string              `json:"path"`
-	SpritesMap map[string][]Sprite `json:"spritesMap"`
-	Children   map[string]Tree     `json:"children"`
+	SpriteType SpriteType      `json:"spriteType"`
+	Path       string          `json:"path"`
+	SpritesMap SpritesMap      `json:"spritesMap"`
+	Children   map[string]Tree `json:"children"`
 }
 
 type FileSystem struct {
@@ -81,6 +84,9 @@ const (
 	DirNameSprites       string = "sprites"
 	DirNameModdedSprites string = "modded-sprites"
 	DirNameMod           string = "mod"
+	DirNameFrontend      string = "frontend"
+	DirNameDist          string = "dist"
+	DirNamePublic        string = "public"
 )
 
 const (
@@ -115,3 +121,7 @@ const (
 	SpriteTypeItemIcons     SpriteType = "itemicons"
 	SpriteTypeMonsterIcons  SpriteType = "monstericons"
 )
+
+func (st SpriteType) String() string {
+	return string(st)
+}
