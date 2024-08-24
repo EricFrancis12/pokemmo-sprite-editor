@@ -2,5 +2,7 @@ build/bin
 node_modules
 frontend/dist
 
-mod/*
-modded-sprites/*
+**/mod/*
+**/modded-sprites/*
+
+**/*.db

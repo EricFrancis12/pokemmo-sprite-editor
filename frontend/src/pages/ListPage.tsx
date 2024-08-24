@@ -123,18 +123,22 @@ function Sprites({ ids, spriteType, spritesTree }: {
 export function DynamicSprite({ sprite }: {
     sprite: main.Sprite;
 }) {
-    // const [path, setPath] = useState(sprite.url);
     const path = useRef(sprite.url)
 
-    fetch(sprite.url)
-        .then(res => res.blob())
-        .then(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-            // setPath(blobUrl);
-            path.current = blobUrl;
-        });
+    function fetchSprite() {
+        fetch(sprite.url, { cache: "no-store" })
+            .then(res => res.blob())
+            .then(blob => {
+                const blobUrl = URL.createObjectURL(blob);
+                path.current = blobUrl;
+            });
+    }
+    fetchSprite();
 
     return (
-        <img src={path.current} alt={path.current} />
+        <img
+            src={path.current}
+            alt={path.current}
+        />
     )
 }

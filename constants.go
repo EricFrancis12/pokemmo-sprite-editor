@@ -13,6 +13,12 @@ const (
 )
 
 const (
+	imageDataTableName      string = "IMAGE_DATA"
+	imageDataDriverName     string = "sqlite3"
+	imageDataDataSourceName string = "./image_data.db"
+)
+
+const (
 	XmlVersion   string = "1.0"
 	XmlEncoding  string = "UTF-8"
 	XmlStanalone string = "no"

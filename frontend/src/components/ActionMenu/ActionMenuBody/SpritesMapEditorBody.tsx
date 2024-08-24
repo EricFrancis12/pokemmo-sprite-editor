@@ -19,7 +19,7 @@ const initialColorData: main.ImageData = {
 };
 
 export function toSpriteWithColorData(sprite: main.Sprite): SpriteWithColorData {
-    return { ...sprite, wipImageData: initialColorData } as SpriteWithColorData;
+    return { ...sprite, wipImageData: sprite.imageData } as SpriteWithColorData;
 }
 
 function initialSpritesColorData(sprites: main.Sprite[]): SpriteWithColorData[] {
@@ -44,7 +44,7 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
         const proms = actionMenu.sprites.map(sprite => ProcessSpriteImage(sprite.origPath, spriteModdedPath(sprite), colorData));
         Promise.all(proms)
             .then(() => {
-                fetchData().then(() => setColorData(initialColorData));
+                fetchData();
             });
     }
 
@@ -52,7 +52,7 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
         if (editMode !== EEditMode.single) return;
         ProcessSpriteImage(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), _spriteWithColorData.wipImageData)
             .then(() => {
-                fetchData().then(() => setSpritesWithColorData(initialSpritesColorData(actionMenu.sprites)));
+                fetchData();
             });
     }
 
@@ -137,7 +137,7 @@ function ColorEditor({ colorData, onChange }: {
             >
                 <RangeSlider
                     value={colorData.saturation}
-                    onChange={(saturation: number) => onChange({ ...colorData, saturation })}
+                    onChange={saturation => onChange({ ...colorData, saturation })}
                     min={-1}
                     max={1}
                     step={0.1}

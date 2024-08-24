@@ -58,10 +58,24 @@ func toSprite(filePath string) (Sprite, error) {
 		return Sprite{}, fmt.Errorf("unknown sprite type: %s", dirPath)
 	}
 
+	fileName := filepath.Base(filePath)
+	imageData := ImageData{
+		fileName:   fileName,
+		spriteType: *st,
+	}
+
+	i, err := storage.GetOne(*st, fileName)
+	if err == nil && i != nil {
+		imageData.Hue = i.Hue
+		imageData.Saturation = i.Saturation
+	}
+
 	return Sprite{
+		FileName:   fileName,
 		OrigPath:   filePath,
 		Url:        spritefilePathToUrl(filePath),
 		SpriteType: *st,
+		ImageData:  imageData,
 	}, nil
 }
 

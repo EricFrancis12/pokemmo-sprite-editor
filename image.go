@@ -7,6 +7,7 @@ import (
 	"image/gif"
 	"image/png"
 	"os"
+	"path/filepath"
 
 	"github.com/anthonynsimon/bild/adjust"
 )
@@ -31,6 +32,22 @@ func ProcessPng(inputPath string, outputPath string, imageData ImageData) error 
 		return err
 	}
 	defer outputFile.Close()
+
+	spriteType, err := DirPathToSpriteType(filepath.Dir(outputPath))
+	if err != nil {
+		return err
+	}
+
+	i := ImageData{
+		fileName:   filepath.Base(outputPath),
+		spriteType: *spriteType,
+		Hue:        imageData.Hue,
+		Saturation: imageData.Saturation,
+	}
+	storage.UpsertOne(i)
+	if err := storage.UpsertOne(i); err != nil {
+		return err
+	}
 
 	return png.Encode(outputFile, img)
 }
@@ -72,6 +89,21 @@ func ProcessGif(inputPath string, outputPath string, imageData ImageData) error 
 		return err
 	}
 	defer outputFile.Close()
+
+	spriteType, err := DirPathToSpriteType(filepath.Dir(outputPath))
+	if err != nil {
+		return err
+	}
+
+	i := ImageData{
+		fileName:   filepath.Base(outputPath),
+		spriteType: *spriteType,
+		Hue:        imageData.Hue,
+		Saturation: imageData.Saturation,
+	}
+	if err := storage.UpsertOne(i); err != nil {
+		return err
+	}
 
 	return gif.EncodeAll(outputFile, gifImage)
 }

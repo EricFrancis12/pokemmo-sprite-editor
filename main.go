@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -50,11 +51,88 @@ func MustInit(i Initializer) {
 	}
 }
 
+func testDb() {
+	fmt.Println("~ 0")
+
+	err := os.Remove(imageDataDataSourceName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("~ 1")
+
+	if err := storage.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("~ 2")
+
+	i := ImageData{
+		fileName:   "my cool file name",
+		spriteType: SpriteTypeBattlesprites,
+		Hue:        20,
+		Saturation: 0.4,
+	}
+	if err := storage.UpsertOne(i); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("~ 3")
+
+	imageData, err := storage.GetOne(SpriteTypeBattlesprites, "my cool file name")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%+v\n", imageData)
+
+	fmt.Println("~ 4")
+
+	i.Hue = 40
+	if err := storage.UpsertOne(i); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("~ 5")
+
+	imageData, err = storage.GetOne(SpriteTypeBattlesprites, "my cool file name")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%+v\n", imageData)
+
+	fmt.Println("~ 6")
+
+	allImageData, err := storage.GetAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%+v\n", allImageData)
+
+	fmt.Println("~ 7")
+
+	if err := storage.DeleteOne(SpriteTypeBattlesprites, "my cool file name"); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("~ 8")
+
+	imageData, err = storage.GetOne(SpriteTypeBattlesprites, "my cool file name")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("~ 9")
+	fmt.Printf("%+v\n", imageData)
+	fmt.Println("~ 10")
+}
+
 func main() {
 	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeBattlesprites.String(), fileMode)
 	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeFollowSprites.String(), fileMode)
 	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeItemIcons.String(), fileMode)
 	os.MkdirAll("./"+DirNameModdedSprites+"/"+SpriteTypeMonsterIcons.String(), fileMode)
+
+	testDb()
 
 	// MustInit(fsSprites)
 	// MustInit(fsModdedSprites)

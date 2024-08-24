@@ -15,6 +15,7 @@ export namespace main {
 	    }
 	}
 	export class Sprite {
+	    fileName: string;
 	    origPath: string;
 	    url: string;
 	    spriteType: string;
@@ -26,6 +27,7 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.fileName = source["fileName"];
 	        this.origPath = source["origPath"];
 	        this.url = source["url"];
 	        this.spriteType = source["spriteType"];

@@ -10,6 +10,8 @@ type Initializer interface {
 }
 
 type ImageData struct {
+	fileName   string
+	spriteType SpriteType
 	Hue        int     `json:"hue"`
 	Saturation float64 `json:"saturation"`
 }
@@ -21,6 +23,7 @@ type Dir struct {
 }
 
 type Sprite struct {
+	FileName   string     `json:"fileName"`
 	OrigPath   string     `json:"origPath"`
 	Url        string     `json:"url"`
 	SpriteType SpriteType `json:"spriteType"`
