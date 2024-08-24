@@ -104,7 +104,7 @@ func (a AtlasDataTxt) Bytes() []byte {
 }
 
 const (
-	ApplicationAuthor      string = "https://github.com/EricFrancis12"
+	ApplicationAuthor      string = "Eric Francis"
 	ApplicationDescription string = "PokeMMO Sprite Editor"
 	ApplicationName        string = "PokeMMO Sprite Editor"
 	ApplicationVersion     string = "1.0"

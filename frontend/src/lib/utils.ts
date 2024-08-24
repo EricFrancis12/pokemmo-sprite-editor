@@ -179,3 +179,8 @@ function formatErr(err: unknown): Error {
     if (typeof err === "string") return new Error(err);
     return new Error("unknown error");
 }
+
+export function toSorted<T>(arr: T[], compareFn?: ((a: T, b: T) => number) | undefined): T[] {
+    const copy = structuredClone(arr);
+    return copy.sort(compareFn);
+}

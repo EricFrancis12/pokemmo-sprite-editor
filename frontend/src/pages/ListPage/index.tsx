@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ExportMod } from "../../../wailsjs/go/main/App";
-import { makeSortTypeFunc, nameFromId } from "../../lib/utils";
+import { makeSortTypeFunc, nameFromId, toSorted } from "../../lib/utils";
 import usePagination from "../../hooks/usePagination";
 import { ESortType, ESpriteType } from "../../lib/types";
 import { ActionMenuProvider } from "../../contexts/ActionMenuContext";
@@ -25,7 +25,7 @@ export default function ListPage() {
         : [];
 
     const { Pagination, itemsOnCurrentPage, setCurrentPage } = usePagination(
-        ids.sort(makeSortTypeFunc(sortType, spriteType)),
+        toSorted(ids, makeSortTypeFunc(sortType, spriteType)),
         CARDS_PER_PAGE
     );
 

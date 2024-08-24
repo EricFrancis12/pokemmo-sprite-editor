@@ -13,10 +13,10 @@ export default function Sprites({ ids, spriteType, spritesTree }: {
 
     return (
         <div className="grid grid-cols-4 w-full">
-            {ids.map((id, index) => {
+            {ids.map(id => {
                 const sprites = spriteType ? (spritesTree?.children[spriteType]?.spritesMap[id] ?? []) : [];
                 return (
-                    <div key={index} className="flex justify-center items-center my-4 bg-blue-200">
+                    <div key={id} className="flex justify-center items-center my-4 bg-blue-200">
                         <div
                             className="flex justify-center items-center m-2 cursor-pointer"
                             onClick={() => setActionMenu({
@@ -24,9 +24,9 @@ export default function Sprites({ ids, spriteType, spritesTree }: {
                                 sprites,
                             })}
                         >
-                            {sprites.map((sprite, _index) => {
-                                return _index === sprites.length - 1
-                                    ? <DynamicSprite key={_index} sprite={sprite} />
+                            {sprites.map((sprite, index) => {
+                                return index === sprites.length - 1
+                                    ? <DynamicSprite key={index} sprite={sprite} />
                                     : null
                             })}
                         </div>
