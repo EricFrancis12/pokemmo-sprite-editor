@@ -1,4 +1,4 @@
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 
 export default function ActionMenuFooter({ onSave, disabled }: {
     onSave: () => void;

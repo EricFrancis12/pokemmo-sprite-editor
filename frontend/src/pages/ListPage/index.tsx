@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import { ExportMod } from "../../wailsjs/go/main/App";
-import { importImage, makeSortTypeFunc, nameFromId } from "../lib/utils";
-import { main } from "../../wailsjs/go/models";
-import usePagination from "../hooks/usePagination";
-import { EActionMenuType, ESortType, ESpriteType } from "../lib/types";
-import { ActionMenuProvider, useActionMenuContext } from "../contexts/ActionMenuContext";
-import { useDataContext } from "../contexts/DataContext";
-import { SpriteWithColorData, toSpriteWithColorData } from "../components/ActionMenu/ActionMenuBody/SpritesMapEditorBody";
+import React, { useState } from "react";
+import { ExportMod } from "../../../wailsjs/go/main/App";
+import { makeSortTypeFunc, nameFromId } from "../../lib/utils";
+import usePagination from "../../hooks/usePagination";
+import { ESortType, ESpriteType } from "../../lib/types";
+import { ActionMenuProvider } from "../../contexts/ActionMenuContext";
+import { useDataContext } from "../../contexts/DataContext";
+import Sprites from "./Sprites";
 
-const CARDS_PER_PAGE = 8;
+const CARDS_PER_PAGE = 16;
 
 export default function ListPage() {
     const { spritesTree } = useDataContext();
@@ -84,61 +83,5 @@ export default function ListPage() {
             }
             <Pagination />
         </ActionMenuProvider>
-    )
-}
-
-function Sprites({ ids, spriteType, spritesTree }: {
-    ids: string[];
-    spriteType: ESpriteType;
-    spritesTree: main.Tree
-}) {
-    const { setActionMenu } = useActionMenuContext();
-
-    return (
-        <div className="grid grid-cols-4 w-full">
-            {ids.map((id, index) => {
-                const sprites = spriteType ? (spritesTree?.children[spriteType]?.spritesMap[id] ?? []) : [];
-                return (
-                    <div key={index} className="my-4 bg-blue-200">
-                        <div
-                            className="m-2 bg-green-200 cursor-pointer"
-                            onClick={() => setActionMenu({
-                                type: EActionMenuType.spritesMapEditor,
-                                sprites,
-                            })}
-                        >
-                            {sprites.map((sprite, _index) => {
-                                return _index === sprites.length - 1
-                                    ? <DynamicSprite key={_index} sprite={sprite} />
-                                    : null
-                            })}
-                        </div>
-                    </div>
-                )
-            })}
-        </div>
-    )
-}
-
-export function DynamicSprite({ sprite }: {
-    sprite: main.Sprite;
-}) {
-    const path = useRef(sprite.url)
-
-    function fetchSprite() {
-        fetch(sprite.url, { cache: "no-store" })
-            .then(res => res.blob())
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
-                path.current = blobUrl;
-            });
-    }
-    fetchSprite();
-
-    return (
-        <img
-            src={path.current}
-            alt={path.current}
-        />
     )
 }

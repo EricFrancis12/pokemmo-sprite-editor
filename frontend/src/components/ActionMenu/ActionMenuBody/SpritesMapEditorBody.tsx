@@ -1,13 +1,15 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TActionMenu, TActionMenu_spritesMapEditor } from "../../../lib/types";
 import ActionMenuBodyWrapper from "../ActionMenuBodyWrapper";
-import { DynamicSprite } from "../../../pages/ListPage";
+import DynamicSprite from "../../DynamicSprite";
 import { main } from "../../../../wailsjs/go/models";
 import { ProcessSpriteImage } from "../../../../wailsjs/go/main/App";
 import { spriteModdedPath } from "../../../lib/utils";
 import { useDataContext } from "../../../contexts/DataContext";
 import { EEditMode } from "../../../lib/types";
 import { useEditModeContext } from "../../../contexts/EditModeContext";
+import ColorEditor from "../../ColorEditor";
+import ApplyButton from "../../ApplyButton";
 
 export type SpriteWithColorData = main.Sprite & {
     wipImageData: main.ImageData;
@@ -39,20 +41,40 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
         initialSpritesColorData(actionMenu.sprites)
     );
 
+    const [loading, setLoading] = useState(false);
+
     function handleApplyAll() {
-        if (editMode !== EEditMode.all) return;
+        if (editMode !== EEditMode.all || loading) return;
+
+        setLoading(true);
         const proms = actionMenu.sprites.map(sprite => ProcessSpriteImage(sprite.origPath, spriteModdedPath(sprite), colorData));
         Promise.all(proms)
             .then(() => {
-                fetchData();
+                fetchData().then(() => setTimeout(() => {
+                    const prev = spritesWithColorData;
+                    setSpritesWithColorData([]);
+                    setTimeout(() => {
+                        setSpritesWithColorData(prev.map(s => ({ ...s, wipImageData: colorData } as SpriteWithColorData)));
+                        setLoading(false);
+                    }, 0);
+                }, 0));
             });
     }
 
     function handleApplySingle(_spriteWithColorData: SpriteWithColorData) {
-        if (editMode !== EEditMode.single) return;
+        if (editMode !== EEditMode.single || loading) return;
+
+        setLoading(true)
         ProcessSpriteImage(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), _spriteWithColorData.wipImageData)
             .then(() => {
-                fetchData();
+                fetchData().then(() => setTimeout(() => {
+                    const prev = spritesWithColorData;
+                    setSpritesWithColorData([]);
+                    setTimeout(() => {
+                        setSpritesWithColorData(prev);
+                        setLoading(false);
+                    }, 0);
+                }, 0));
             });
     }
 
@@ -76,18 +98,16 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
                                 colorData={colorData}
                                 onChange={setColorData}
                             />
-                            <button
-                                className="px-2 py-1 rounded bg-green-300"
+                            <ApplyButton
+                                disabled={loading}
                                 onClick={handleApplyAll}
-                            >
-                                Apply
-                            </button>
+                            />
                         </>
                     }
                 </div>
                 <div className="grid grid-cols-2 w-full">
                     {spritesWithColorData.map((spriteWithColorData, index) => (
-                        <div key={index}>
+                        <div key={spriteWithColorData.fileName}>
                             <DynamicSprite sprite={spriteWithColorData} />
                             {editMode === EEditMode.single &&
                                 <>
@@ -97,12 +117,10 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
                                             prev => prev.map((s, i) => i === index ? { ...s, wipImageData: imageData } as SpriteWithColorData : s)
                                         )}
                                     />
-                                    <button
-                                        className="px-2 py-1 rounded bg-green-300"
+                                    <ApplyButton
+                                        disabled={loading}
                                         onClick={() => handleApplySingle(spriteWithColorData)}
-                                    >
-                                        Apply
-                                    </button>
+                                    />
                                 </>
                             }
                         </div>
@@ -110,81 +128,5 @@ export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
                 </div>
             </div>
         </ActionMenuBodyWrapper>
-    )
-}
-
-function ColorEditor({ colorData, onChange }: {
-    colorData: main.ImageData;
-    onChange: (newColorData: main.ImageData) => void;
-}) {
-    return (
-        <div className="flex flex-col gap-2">
-            <ColorEditorRow
-                title="Hue"
-                value={colorData.hue}
-            >
-                <RangeSlider
-                    value={colorData.hue}
-                    onChange={(hue: number) => onChange({ ...colorData, hue })}
-                    min={-360}
-                    max={360}
-                    step={1}
-                />
-            </ColorEditorRow>
-            <ColorEditorRow
-                title="Saturation"
-                value={colorData.saturation}
-            >
-                <RangeSlider
-                    value={colorData.saturation}
-                    onChange={saturation => onChange({ ...colorData, saturation })}
-                    min={-1}
-                    max={1}
-                    step={0.1}
-                />
-            </ColorEditorRow>
-        </div>
-    )
-}
-
-function ColorEditorRow({ value, children, title }: {
-    value: number;
-    children: ReactNode;
-    title: string;
-}) {
-    return (
-        <div className="flex items-center gap-3 h-full">
-            <div className="w-[20px]">{value}</div>
-            {children}
-            <span>{title}</span>
-        </div>
-    )
-}
-
-
-function RangeSlider({ value, onChange, min, max, step, className, style }: {
-    value: number;
-    onChange: (n: number) => void;
-    min: number;
-    max: number;
-    step: number;
-    className?: string;
-    style?: React.CSSProperties;
-}) {
-    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const n = parseFloat(e.target.value);
-        if (!isNaN(n)) onChange(n);
-    }
-
-    return (
-        <input
-            type="range"
-            className={className} style={style}
-            step={step}
-            min={min}
-            max={max}
-            value={value}
-            onChange={handleChange}
-        />
     )
 }

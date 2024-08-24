@@ -1,4 +1,4 @@
-
+import React from "react";
 
 export type TPagination = '<<' | '<' | number | '...' | '>' | '>>';
 
@@ -9,9 +9,9 @@ export default function Pagination({ pagination, currentPage, onClick = () => { 
 }) {
     return (
         <div className='flex justify-around w-full mt-2'>
-            {pagination.map((pgn, _index) => (
+            {pagination.map((pgn, index) => (
                 <span
-                    key={_index}
+                    key={index}
                     className={(pgn !== '...' ? 'cursor-pointer hover:underline ' : ' ')
                         + (pgn === currentPage ? ' text-blue-500 font-bold' : ' ')}
                     onClick={() => onClick(pgn)}

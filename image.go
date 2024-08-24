@@ -33,19 +33,7 @@ func ProcessPng(inputPath string, outputPath string, imageData ImageData) error 
 	}
 	defer outputFile.Close()
 
-	spriteType, err := DirPathToSpriteType(filepath.Dir(outputPath))
-	if err != nil {
-		return err
-	}
-
-	i := ImageData{
-		fileName:   filepath.Base(outputPath),
-		spriteType: *spriteType,
-		Hue:        imageData.Hue,
-		Saturation: imageData.Saturation,
-	}
-	storage.UpsertOne(i)
-	if err := storage.UpsertOne(i); err != nil {
+	if err := saveToStorage(outputPath, imageData); err != nil {
 		return err
 	}
 
@@ -90,6 +78,14 @@ func ProcessGif(inputPath string, outputPath string, imageData ImageData) error 
 	}
 	defer outputFile.Close()
 
+	if err := saveToStorage(outputPath, imageData); err != nil {
+		return err
+	}
+
+	return gif.EncodeAll(outputFile, gifImage)
+}
+
+func saveToStorage(outputPath string, imageData ImageData) error {
 	spriteType, err := DirPathToSpriteType(filepath.Dir(outputPath))
 	if err != nil {
 		return err
@@ -101,11 +97,12 @@ func ProcessGif(inputPath string, outputPath string, imageData ImageData) error 
 		Hue:        imageData.Hue,
 		Saturation: imageData.Saturation,
 	}
+	storage.UpsertOne(i)
 	if err := storage.UpsertOne(i); err != nil {
 		return err
 	}
 
-	return gif.EncodeAll(outputFile, gifImage)
+	return nil
 }
 
 func PalettedToRGBA(paletted *image.Paletted, bounds image.Rectangle) *image.RGBA {

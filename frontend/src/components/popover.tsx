@@ -1,3 +1,5 @@
+import React from "react";
+
 export const POPOVER_BASE_Z_INDEX = 100;
 
 function backdropZIndex(zIndez: number): number {

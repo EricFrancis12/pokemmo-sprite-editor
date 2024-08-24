@@ -1,3 +1,4 @@
+import React from "react";
 import SpritesMapEditorBody from "./SpritesMapEditorBody";
 import { EActionMenuType, TActionMenu } from "../../../lib/types";
 

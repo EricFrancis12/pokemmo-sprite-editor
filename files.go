@@ -24,19 +24,6 @@ func NewFileSystem(rootPath string) *FileSystem {
 	}
 }
 
-func (fs *FileSystem) Init() error {
-	return fs.EnsureAbsPath()
-}
-
-func (fs *FileSystem) EnsureAbsPath() error {
-	absPath, err := filepath.Abs(fs.RootPath)
-	if err != nil {
-		return err
-	}
-	fs.RootPath = absPath
-	return nil
-}
-
 func (fs FileSystem) Dir() (Dir, error) {
 	return traverseDir(fs.RootPath)
 }

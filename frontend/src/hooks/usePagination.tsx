@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Pagination, { generatePagination, TPagination } from "../components/Pagination";
 
 export { Pagination, generatePagination };

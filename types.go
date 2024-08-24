@@ -2,11 +2,16 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 )
 
 type Initializer interface {
 	Init() error
+}
+
+type FileLoader struct {
+	http.Handler
 }
 
 type ImageData struct {
@@ -124,6 +129,13 @@ const (
 	SpriteTypeItemIcons     SpriteType = "itemicons"
 	SpriteTypeMonsterIcons  SpriteType = "monstericons"
 )
+
+var spriteTypes = []SpriteType{
+	SpriteTypeBattlesprites,
+	SpriteTypeFollowSprites,
+	SpriteTypeItemIcons,
+	SpriteTypeMonsterIcons,
+}
 
 func (st SpriteType) String() string {
 	return string(st)
