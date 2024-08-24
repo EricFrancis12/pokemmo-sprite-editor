@@ -6,3 +6,4 @@ frontend/dist
 **/modded-sprites/*
 
 **/*.db
+*.syso

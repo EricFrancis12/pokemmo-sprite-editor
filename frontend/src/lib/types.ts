@@ -5,6 +5,7 @@ export enum EDirName {
     moddedSprites = "modded-sprites",
     mod = "mod",
     frontend = "frontend",
+    dist = "dist",
     public = "public",
 }
 

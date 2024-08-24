@@ -6,7 +6,7 @@ export function spriteModdedPath(sprite: main.Sprite): string {
     const parts = sprite.origPath
         .replace(EDirName.sprites, EDirName.moddedSprites)
         .replaceAll("\\", "/")
-        .split(EDirName.public);
+        .split(EDirName.dist);
     return stripPrefix(parts[parts.length - 1] ?? "", "/");
 }
 

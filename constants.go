@@ -2,12 +2,10 @@ package main
 
 import "io/fs"
 
-const SpriteFileExt string = FileExtPng
-
 const fileMode fs.FileMode = fs.ModePerm
 
 const (
-	spritesDirPath       string = DirNameFrontend + "/" + DirNamePublic + "/" + DirNameSprites
+	spritesDirPath       string = DirNameFrontend + "/" + DirNameDist + "/" + DirNameSprites
 	moddedSpritesDirPath string = DirNameModdedSprites
 	modDirPath           string = DirNameMod
 )

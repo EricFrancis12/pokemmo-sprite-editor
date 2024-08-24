@@ -32,7 +32,7 @@ func isSprite(filePath string) (bool, error) {
 
 	ext := FileExt(file.Name())
 	if ext != FileExtPng && ext != FileExtGif {
-		return false, fmt.Errorf("expected %s, but got %s", SpriteFileExt, ext)
+		return false, fmt.Errorf("unexpected file extension: %s", ext)
 	}
 
 	if _, err := DirPathToSpriteType(filepath.Dir(filePath)); err != nil {

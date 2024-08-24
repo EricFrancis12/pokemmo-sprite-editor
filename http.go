@@ -14,10 +14,9 @@ func NewFileLoader() *FileLoader {
 func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	requestedFilename := strings.TrimPrefix(req.URL.Path, "/")
 
-	fileData, err := os.ReadFile(requestedFilename)
+	fileData, err := os.ReadFile(strings.TrimPrefix(requestedFilename, DirNameFrontend+"/"+DirNameDist+"/"))
 	if err != nil {
 		spritePath := strings.Replace(requestedFilename, DirNameModdedSprites, DirNameSprites, 1)
-		spritePath = DirNameFrontend + "/" + DirNameDist + "/" + spritePath
 
 		fd, err := os.ReadFile(spritePath)
 		if err != nil {
