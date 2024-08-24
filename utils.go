@@ -139,3 +139,15 @@ func NewInfoXml() InfoXml {
 		Weblink:     ApplicationWeblink,
 	}
 }
+
+func AtlasDataTxtFileName() string {
+	return "atlasdata." + FileExtTxt
+}
+
+func AtlasDataTxtZipPath() string {
+	return DirNameSprites + "/" + SpriteTypeFollowSprites.String() + "/" + AtlasDataTxtFileName()
+}
+
+func NewAtlasDataTxt() AtlasDataTxt {
+	return AtlasDataTxt{}
+}

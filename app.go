@@ -66,5 +66,9 @@ func (a *App) ExportMod() error {
 		return err
 	}
 
+	if err := writeToZipFile(zw, AtlasDataTxtZipPath(), NewAtlasDataTxt().Bytes()); err != nil {
+		return err
+	}
+
 	return nil
 }

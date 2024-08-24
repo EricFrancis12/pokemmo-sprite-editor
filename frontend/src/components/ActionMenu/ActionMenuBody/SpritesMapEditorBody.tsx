@@ -28,7 +28,7 @@ function initialSpritesColorData(sprites: main.Sprite[]): SpriteWithColorData[] 
     return sprites.map(toSpriteWithColorData);
 }
 
-export default function SpritesMapEditorBody({ actionMenu, setActionMenu }: {
+export default function SpritesMapEditorBody({ actionMenu }: {
     actionMenu: TActionMenu_spritesMapEditor;
     setActionMenu: React.Dispatch<React.SetStateAction<TActionMenu | null>>;
 }) {

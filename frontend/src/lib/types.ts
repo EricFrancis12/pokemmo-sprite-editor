@@ -11,7 +11,7 @@ export enum EDirName {
 
 export enum ESpriteType {
     battlesprites = "battlesprites",
-    followsprites = "followsprites",
+    followsprites = "followersprites",
     itemicons = "itemicons",
     monstericons = "monstericons",
 }

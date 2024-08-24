@@ -80,6 +80,29 @@ func (ix InfoXml) Bytes() []byte {
 	return []byte(ix.String())
 }
 
+type AtlasDataTxt struct{}
+
+func (a AtlasDataTxt) String() string {
+	str := "rows=4\n"
+	str += "columns=4\n\n"
+
+	str += "[00][01][02][03]\n"
+	str += "[04][05][06][07]\n"
+	str += "[08][09][10][11]\n"
+	str += "[12][13][14][15]\n"
+
+	str += "north=0,1,2,3\n"
+	str += "south=12,13,14,15\n"
+	str += "west=4,5,6,7\n"
+	str += "east=8,9,10,11\n\n"
+
+	return str
+}
+
+func (a AtlasDataTxt) Bytes() []byte {
+	return []byte(a.String())
+}
+
 const (
 	ApplicationAuthor      string = "https://github.com/EricFrancis12"
 	ApplicationDescription string = "PokeMMO Sprite Editor"
@@ -101,6 +124,7 @@ const (
 	FileExtGif string = "gif"
 	FileExtPng string = "png"
 	FileExtXml string = "xml"
+	FileExtTxt string = "txt"
 )
 
 const (
@@ -125,7 +149,7 @@ type SpriteType string
 
 const (
 	SpriteTypeBattlesprites SpriteType = "battlesprites"
-	SpriteTypeFollowSprites SpriteType = "followsprites"
+	SpriteTypeFollowSprites SpriteType = "followersprites"
 	SpriteTypeItemIcons     SpriteType = "itemicons"
 	SpriteTypeMonsterIcons  SpriteType = "monstericons"
 )
