@@ -2,18 +2,20 @@ package main
 
 import "io/fs"
 
-const fileMode fs.FileMode = fs.ModePerm
-
 const (
-	spritesDirPath       string = DirNameFrontend + "/" + DirNameDist + "/" + DirNameSprites
-	moddedSpritesDirPath string = DirNameModdedSprites
-	modDirPath           string = DirNameMod
+	applicationAuthor      string = "Eric Francis"
+	applicationDescription string = "PokeMMO Sprite Editor"
+	applicationName        string = "PokeMMO Sprite Editor"
+	applicationVersion     string = "1.0"
+	applicationWeblink     string = "https://github.com/EricFrancis12/pokemmo-sprite-editor"
 )
+
+const fileMode fs.FileMode = fs.ModePerm
 
 const (
 	imageDataTableName      string = "IMAGE_DATA"
 	imageDataDriverName     string = "sqlite3"
-	imageDataDataSourceName string = "./image_data.db"
+	imageDataDataSourceName string = "./data.db"
 )
 
 const (

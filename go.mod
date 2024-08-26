@@ -6,6 +6,7 @@ toolchain go1.22.6
 
 require (
 	github.com/anthonynsimon/bild v0.14.0
+	github.com/gorilla/mux v1.8.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/wailsapp/wails/v2 v2.9.1
 )
@@ -37,5 +38,7 @@ require (
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 )
+
+// replace github.com/wailsapp/wails/v2 v2.9.1 => C:\Users\erice\go\pkg\mod

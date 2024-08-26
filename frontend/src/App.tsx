@@ -1,19 +1,34 @@
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ListPage from "./pages/ListPage";
+import { ActionMenuProvider } from "./contexts/ActionMenuContext";
 import { DataProvider } from "./contexts/DataContext";
 import { EditModeProvider } from "./contexts/EditModeContext";
 
 export default function App() {
     return (
+        <AppContextProvider>
+            <Router>
+                <Routes>
+                    <Route index element={<ListPage />} />
+                    <Route path="*" element={<div>Not Found</div>} />
+                </Routes>
+            </Router>
+        </AppContextProvider>
+    )
+}
+
+function AppContextProvider({ children }: {
+    children: React.ReactNode;
+}) {
+    return (
         <DataProvider>
             <EditModeProvider>
-                <Router>
-                    <Routes>
-                        <Route index element={<ListPage />} />
-                        <Route path="*" element={<div>Not Found</div>} />
-                    </Routes>
-                </Router>
+                <ActionMenuProvider>
+                    {children}
+                </ActionMenuProvider>
             </EditModeProvider>
         </DataProvider>
+
     )
 }

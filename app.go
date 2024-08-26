@@ -24,26 +24,74 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func (a *App) SpritesDir() (Dir, error) {
-	return fsSprites.Dir()
+func (a *App) GetSpriteData() (SpriteData, error) {
+	return makeSpriteData()
 }
 
-func (a *App) SpritesTree() (Tree, error) {
-	return fsSprites.Tree()
+func (a *App) GetSpriteGroupData() (SpriteGroupData, error) {
+	return makeSpriteGroupData()
 }
 
-func (a *App) ProcessSpriteImage(inputPath string, outputPath string, imageData ImageData) error {
-	ext := FileExt(inputPath)
-	if ext == FileExtPng {
-		return ProcessPng(inputPath, outputPath, imageData)
-	} else if ext == FileExtGif {
-		return ProcessGif(inputPath, outputPath, imageData)
+func (a *App) GetSpritesByType(st SpriteType) ([]Sprite, error) {
+	return getSpritesByType(st)
+}
+
+func (a *App) GetSpriteGroup(st SpriteType, id string) (SpriteGroup, error) {
+	sgd, err := a.GetSpriteGroupData()
+	if err != nil {
+		return SpriteGroup{}, err
 	}
-	return fmt.Errorf("unknown file extension: %s", ext)
+
+	sg, ok := findInSlice(sgd.Data[st], func(sg SpriteGroup, i int) bool {
+		_, ok := findInSlice(sg.Sprites, func(s Sprite, i int) bool {
+			return s.ID == id
+		})
+		return ok
+	})
+
+	if !ok {
+		return SpriteGroup{}, fmt.Errorf("not found")
+	}
+
+	return *sg, nil
+}
+
+func (a *App) ProcessSprite(sprite Sprite, imageData ImageData) error {
+	return sprite.Process(imageData)
+}
+
+func (a *App) ProcessSprites(sprites []Sprite, imageData ImageData) error {
+	for _, sprite := range sprites {
+		err := a.ProcessSprite(sprite, imageData)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (a *App) DeleteModdedSprite(sprite Sprite) error {
+	err := os.Remove(sprite.ModdedPath())
+	if err != nil {
+		return err
+	}
+	return storage.DeleteOne(sprite.SpriteType, sprite.FileName)
+}
+
+func (a *App) DeleteModdedSprites(sprites []Sprite) error {
+	for _, sprite := range sprites {
+		err := a.DeleteModdedSprite(sprite)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (a *App) ExportMod() error {
-	outputPath := filepath.Join(modDirPath, FileNameModZip)
+	os.Mkdir(DirNameMod, fileMode)
+
+	outputPath := filepath.Join(DirNameMod, FileNameModZip)
 	archive, err := os.Create(outputPath)
 	if err != nil {
 		return err
@@ -62,12 +110,16 @@ func (a *App) ExportMod() error {
 		return err
 	}
 
-	if err := ZipDirRecursively(zw, moddedSpritesDirPath, DirNameSprites, filterExcludedEntries); err != nil {
+	if err := ZipDirRecursively(zw, DirNameModdedSprites, DirNameSprites, filterExcludedEntries); err != nil {
 		return err
 	}
 
-	if err := writeToZipFile(zw, AtlasDataTxtZipPath(), NewAtlasDataTxt().Bytes()); err != nil {
-		return err
+	sprites, _ := getSpritesByType(SpriteTypeFollowSprites)
+	if len(sprites) > 0 {
+		err := writeToZipFile(zw, AtlasDataTxtZipPath(), NewAtlasDataTxt().Bytes())
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

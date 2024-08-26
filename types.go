@@ -1,17 +1,24 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
+	"io/fs"
 	"net/http"
-	"strings"
+
+	"github.com/gorilla/mux"
 )
 
-type Initializer interface {
-	Init() error
+type FileSystem interface {
+	Open(name string) (fs.File, error)
+	ReadDir(name string) ([]fs.DirEntry, error)
+	ReadFile(name string) ([]byte, error)
 }
+
+type OSPkg struct{}
 
 type FileLoader struct {
 	http.Handler
+	Router *mux.Router
 }
 
 type ImageData struct {
@@ -21,31 +28,10 @@ type ImageData struct {
 	Saturation float64 `json:"saturation"`
 }
 
-type Dir struct {
-	Path    string   `json:"path"`
-	Sprites []Sprite `json:"sprites"`
-	Dirs    []Dir    `json:"dirs"`
-}
-
-type Sprite struct {
-	FileName   string     `json:"fileName"`
-	OrigPath   string     `json:"origPath"`
-	Url        string     `json:"url"`
-	SpriteType SpriteType `json:"spriteType"`
-	ImageData  ImageData  `json:"imageData"`
-}
-
-type SpritesMap = map[string][]Sprite
-
-type Tree struct {
-	SpriteType SpriteType      `json:"spriteType"`
-	Path       string          `json:"path"`
-	SpritesMap SpritesMap      `json:"spritesMap"`
-	Children   map[string]Tree `json:"children"`
-}
-
-type FileSystem struct {
-	RootPath string `json:"rootPath"`
+type ImageDataStorage struct {
+	DriverName     string
+	DataSourceName string
+	Client         *sql.DB
 }
 
 type InfoXml struct {
@@ -56,68 +42,47 @@ type InfoXml struct {
 	Weblink     string
 }
 
-func (ix InfoXml) String() string {
-	lines := []string{
-		fmt.Sprintf(
-			`<?xml version="%s" encoding="%s" standalone="%s"?>`,
-			XmlVersion,
-			XmlEncoding,
-			XmlStanalone,
-		),
-		fmt.Sprintf(
-			`<resource author="%s" description="%s" name="%s" version="%s" weblink="%s"/>`,
-			ix.Author,
-			ix.Description,
-			ix.Name,
-			ix.Version,
-			ix.Weblink,
-		),
-	}
-	return strings.Join(lines, "\n")
+type ServerError struct {
+	Error string `json:"error"`
 }
 
-func (ix InfoXml) Bytes() []byte {
-	return []byte(ix.String())
+type Sprite struct {
+	ID         string     `json:"id"`
+	Url        string     `json:"url"`
+	SpriteType SpriteType `json:"spriteType"`
+	FileName   string     `json:"fileName"`
+	ImageData  ImageData  `json:"imageData"`
 }
 
-type AtlasDataTxt struct{}
+type SpritesMap map[SpriteType][]Sprite
 
-func (a AtlasDataTxt) String() string {
-	str := "rows=4\n"
-	str += "columns=4\n\n"
-
-	str += "[00][01][02][03]\n"
-	str += "[04][05][06][07]\n"
-	str += "[08][09][10][11]\n"
-	str += "[12][13][14][15]\n"
-
-	str += "north=0,1,2,3\n"
-	str += "south=12,13,14,15\n"
-	str += "west=4,5,6,7\n"
-	str += "east=8,9,10,11\n\n"
-
-	return str
+type SpriteData struct {
+	Data SpritesMap `json:"data"`
 }
 
-func (a AtlasDataTxt) Bytes() []byte {
-	return []byte(a.String())
+type SpriteGroup struct {
+	ID      string   `json:"id"`
+	Sprites []Sprite `json:"sprites"`
+}
+
+type SpriteGroupMap map[SpriteType][]SpriteGroup
+
+type SpriteGroupData struct {
+	Data SpriteGroupMap `json:"data"`
 }
 
 const (
-	ApplicationAuthor      string = "Eric Francis"
-	ApplicationDescription string = "PokeMMO Sprite Editor"
-	ApplicationName        string = "PokeMMO Sprite Editor"
-	ApplicationVersion     string = "1.0"
-	ApplicationWeblink     string = "https://github.com/EricFrancis12/pokemmo-sprite-editor"
+	ContentTypeApplicationJSON string = "application/json"
 )
 
 const (
-	DirNameSprites       string = "sprites"
-	DirNameModdedSprites string = "modded-sprites"
-	DirNameMod           string = "mod"
-	DirNameFrontend      string = "frontend"
+	DirNameData          string = "data"
 	DirNameDist          string = "dist"
+	DirNameFrontend      string = "frontend"
+	DirNameMod           string = "mod"
+	DirNameModdedSprites string = "modded-sprites"
 	DirNamePublic        string = "public"
+	DirNameSprites       string = "sprites"
 )
 
 const (
@@ -132,17 +97,12 @@ const (
 	FileNameModZip    string = "pokemmo-sprite-editor.zip"
 )
 
-type Gender string
-
 const (
-	GenderFemale Gender = "f"
-	GenderMale   Gender = "m"
-	GenderBoth   Gender = "b"
+	HTTPHeaderContentType string = "Content-Type"
 )
 
 const (
-	IsShinyN string = "n"
-	IsShinyS string = "s"
+	PathSegmentApi string = "api"
 )
 
 type SpriteType string

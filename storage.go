@@ -9,12 +9,6 @@ import (
 
 var storage = NewImageDataStorage(imageDataDriverName, imageDataDataSourceName)
 
-type ImageDataStorage struct {
-	DriverName     string
-	DataSourceName string
-	Client         *sql.DB
-}
-
 func NewImageDataStorage(driverName string, dataSourceName string) *ImageDataStorage {
 	return &ImageDataStorage{
 		DriverName:     driverName,
@@ -71,7 +65,9 @@ func (s *ImageDataStorage) GetAll() ([]ImageData, error) {
 }
 
 func (s *ImageDataStorage) GetOne(st SpriteType, fileName string) (*ImageData, error) {
-	rows, err := s.Client.Query(fmt.Sprintf(`select * from %s where spriteType = "%s" and fileName = "%s"`, imageDataTableName, st, fileName))
+	rows, err := s.Client.Query(
+		fmt.Sprintf(`select * from %s where spriteType = "%s" and fileName = "%s"`, imageDataTableName, st, fileName),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +95,9 @@ func (s *ImageDataStorage) UpsertOne(i ImageData) error {
 }
 
 func (s *ImageDataStorage) DeleteOne(st SpriteType, fileName string) error {
-	_, err := s.Client.Query(fmt.Sprintf(`delete from %s where spriteType = "%s" and fileName = "%s"`, imageDataTableName, st, fileName))
+	_, err := s.Client.Query(
+		fmt.Sprintf(`delete from %s where spriteType = "%s" and fileName = "%s"`, imageDataTableName, st, fileName),
+	)
 	return err
 }
 

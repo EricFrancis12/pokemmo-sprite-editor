@@ -15,10 +15,10 @@ export namespace main {
 	    }
 	}
 	export class Sprite {
-	    fileName: string;
-	    origPath: string;
+	    id: string;
 	    url: string;
 	    spriteType: string;
+	    fileName: string;
 	    imageData: ImageData;
 	
 	    static createFrom(source: any = {}) {
@@ -27,10 +27,10 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.fileName = source["fileName"];
-	        this.origPath = source["origPath"];
+	        this.id = source["id"];
 	        this.url = source["url"];
 	        this.spriteType = source["spriteType"];
+	        this.fileName = source["fileName"];
 	        this.imageData = this.convertValues(source["imageData"], ImageData);
 	    }
 	
@@ -52,20 +52,30 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class Dir {
-	    path: string;
-	    sprites: Sprite[];
-	    dirs: Dir[];
+	export class SpriteData {
+	    data: {[key: string]: Sprite[]};
 	
 	    static createFrom(source: any = {}) {
-	        return new Dir(source);
+	        return new SpriteData(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.path = source["path"];
+	        this.data = source["data"];
+	    }
+	}
+	export class SpriteGroup {
+	    id: string;
+	    sprites: Sprite[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SpriteGroup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
 	        this.sprites = this.convertValues(source["sprites"], Sprite);
-	        this.dirs = this.convertValues(source["dirs"], Dir);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -86,43 +96,17 @@ export namespace main {
 		    return a;
 		}
 	}
-	
-	
-	export class Tree {
-	    spriteType: string;
-	    path: string;
-	    spritesMap: {[key: string]: Sprite[]};
-	    children: {[key: string]: Tree};
+	export class SpriteGroupData {
+	    data: {[key: string]: SpriteGroup[]};
 	
 	    static createFrom(source: any = {}) {
-	        return new Tree(source);
+	        return new SpriteGroupData(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.spriteType = source["spriteType"];
-	        this.path = source["path"];
-	        this.spritesMap = source["spritesMap"];
-	        this.children = this.convertValues(source["children"], Tree, true);
+	        this.data = source["data"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 
 }

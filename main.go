@@ -2,6 +2,8 @@ package main
 
 import (
 	"embed"
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/wailsapp/wails/v2"
@@ -12,26 +14,21 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-func MustInit(i Initializer) {
-	err := i.Init()
-	if err != nil {
-		panic(err)
-	}
-}
-
 func main() {
 	for _, spriteType := range spriteTypes {
-		os.MkdirAll("./"+DirNameModdedSprites+"/"+spriteType.String(), fileMode)
+		os.MkdirAll(fmt.Sprintf("./%s/%s", DirNameModdedSprites, spriteType), fileMode)
 	}
 
-	MustInit(storage)
+	if err := storage.Init(); err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an instance of the app structure
 	app := NewApp()
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "pokemmo-sprite-editor",
+		Title:  "PokeMMO Sprite Editor",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{

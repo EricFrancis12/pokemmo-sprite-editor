@@ -1,31 +1,29 @@
 import React, { useState } from "react";
 import { TActionMenu, TActionMenu_spritesMapEditor } from "../../../lib/types";
 import ActionMenuBodyWrapper from "../ActionMenuBodyWrapper";
-import DynamicSprite from "../../DynamicSprite";
 import { main } from "../../../../wailsjs/go/models";
-import { ProcessSpriteImage } from "../../../../wailsjs/go/main/App";
-import { spriteModdedPath } from "../../../lib/utils";
+import { ProcessSprite, ProcessSprites } from "../../../../wailsjs/go/main/App";
 import { useDataContext } from "../../../contexts/DataContext";
 import { EEditMode } from "../../../lib/types";
 import { useEditModeContext } from "../../../contexts/EditModeContext";
 import ColorEditor from "../../ColorEditor";
-import ApplyButton from "../../ApplyButton";
+import { ApplyButton } from "../../buttons";
 
-export type SpriteWithColorData = main.Sprite & {
+type WIPSprite = main.Sprite & {
     wipImageData: main.ImageData;
 };
 
-const initialColorData: main.ImageData = {
+const initialImageData: main.ImageData = {
     hue: 0,
     saturation: 0,
 };
 
-export function toSpriteWithColorData(sprite: main.Sprite): SpriteWithColorData {
-    return { ...sprite, wipImageData: sprite.imageData } as SpriteWithColorData;
+function toWIPSprite(sprite: main.Sprite): WIPSprite {
+    return { ...sprite, wipImageData: structuredClone(sprite.imageData) } as WIPSprite;
 }
 
-function initialSpritesColorData(sprites: main.Sprite[]): SpriteWithColorData[] {
-    return sprites.map(toSpriteWithColorData);
+function initialSpritesImageData(sprites: main.Sprite[]): WIPSprite[] {
+    return sprites.map(toWIPSprite);
 }
 
 export default function SpritesMapEditorBody({ actionMenu }: {
@@ -35,52 +33,51 @@ export default function SpritesMapEditorBody({ actionMenu }: {
     const { fetchData } = useDataContext();
     const { editMode, setEditMode } = useEditModeContext();
 
-    const [colorData, setColorData] = useState<main.ImageData>(initialColorData);
+    const [imageData, setImageData] = useState<main.ImageData>(initialImageData);
 
-    const [spritesWithColorData, setSpritesWithColorData] = useState<SpriteWithColorData[]>(
-        initialSpritesColorData(actionMenu.sprites)
+    const [wipSprites, setWipSprites] = useState<WIPSprite[]>(
+        initialSpritesImageData(actionMenu.sprites)
     );
 
     const [loading, setLoading] = useState(false);
 
-    function handleApplyAll() {
-        if (editMode !== EEditMode.all || loading) return;
-
+    function handleApplySingle(wipSprite: WIPSprite) {
+        if (editMode !== EEditMode.single) return;
         setLoading(true);
-        const proms = actionMenu.sprites.map(sprite => ProcessSpriteImage(sprite.origPath, spriteModdedPath(sprite), colorData));
-        Promise.all(proms)
-            .then(() => {
-                fetchData().then(() => setTimeout(() => {
-                    const prev = spritesWithColorData;
-                    setSpritesWithColorData([]);
-                    setTimeout(() => {
-                        setSpritesWithColorData(prev.map(s => ({ ...s, wipImageData: colorData } as SpriteWithColorData)));
-                        setLoading(false);
-                    }, 0);
-                }, 0));
-            });
+        ProcessSprite(wipSprite, wipSprite.wipImageData).then(refreshSingle);
     }
 
-    function handleApplySingle(_spriteWithColorData: SpriteWithColorData) {
-        if (editMode !== EEditMode.single || loading) return;
+    function handleApplyAll() {
+        if (editMode !== EEditMode.all) return;
+        setLoading(true);
+        ProcessSprites(actionMenu.sprites, imageData).then(refreshAll);
+    }
 
-        setLoading(true)
-        ProcessSpriteImage(_spriteWithColorData.origPath, spriteModdedPath(_spriteWithColorData), _spriteWithColorData.wipImageData)
-            .then(() => {
-                fetchData().then(() => setTimeout(() => {
-                    const prev = spritesWithColorData;
-                    setSpritesWithColorData([]);
-                    setTimeout(() => {
-                        setSpritesWithColorData(prev);
-                        setLoading(false);
-                    }, 0);
-                }, 0));
-            });
+    function refreshSingle() {
+        fetchData().then(() => setTimeout(() => {
+            const prev = wipSprites;
+            setWipSprites([]);
+            setTimeout(() => {
+                setWipSprites(prev);
+                setLoading(false)
+            }, 0);
+        }, 0));
+    }
+
+    function refreshAll() {
+        fetchData().then(() => setTimeout(() => {
+            const prev = wipSprites;
+            setWipSprites([]);
+            setTimeout(() => {
+                setWipSprites(prev.map(s => ({ ...s, wipImageData: structuredClone(imageData) } as WIPSprite)));
+                setLoading(false)
+            }, 0);
+        }, 0));
     }
 
     return (
         <ActionMenuBodyWrapper>
-            <div className="flex flex-col gap-4 w-full h-full p-2">
+            <div className="flex flex-col items-center gap-4 w-full h-full p-2">
                 <div className="flex justify-center items-center gap-2 h-[40px] w-full">
                     {Object.values(EEditMode).map((_editMode, index) => (
                         <div key={index} className="flex justify-center items-center gap-2">
@@ -92,36 +89,44 @@ export default function SpritesMapEditorBody({ actionMenu }: {
                             />
                         </div>
                     ))}
-                    {editMode === EEditMode.all &&
-                        <>
-                            <ColorEditor
-                                colorData={colorData}
-                                onChange={setColorData}
-                            />
+                </div>
+                {editMode === EEditMode.all &&
+                    <div className="flex gap-3">
+                        <ColorEditor
+                            colorData={imageData}
+                            onChange={setImageData}
+                        />
+                        <div>
                             <ApplyButton
                                 disabled={loading}
                                 onClick={handleApplyAll}
                             />
-                        </>
-                    }
-                </div>
-                <div className="grid grid-cols-2 w-full">
-                    {spritesWithColorData.map((spriteWithColorData, index) => (
-                        <div key={spriteWithColorData.fileName}>
-                            <DynamicSprite sprite={spriteWithColorData} />
+                        </div>
+                    </div>
+                }
+                <div className="grid grid-cols-2 gap-4 w-full">
+                    {wipSprites.map((wipSprite, index) => (
+                        <div key={wipSprite.fileName}>
+                            <img src={wipSprite.url} className="m-4" />
                             {editMode === EEditMode.single &&
-                                <>
+                                <div className="flex gap-3">
                                     <ColorEditor
-                                        colorData={spriteWithColorData.wipImageData}
-                                        onChange={imageData => setSpritesWithColorData(
-                                            prev => prev.map((s, i) => i === index ? { ...s, wipImageData: imageData } as SpriteWithColorData : s)
+                                        colorData={wipSprite.wipImageData}
+                                        onChange={imageData => setWipSprites(
+                                            prev => prev.map(
+                                                (spr, i) => i === index
+                                                    ? { ...spr, wipImageData: structuredClone(imageData) } as WIPSprite
+                                                    : spr
+                                            )
                                         )}
                                     />
-                                    <ApplyButton
-                                        disabled={loading}
-                                        onClick={() => handleApplySingle(spriteWithColorData)}
-                                    />
-                                </>
+                                    <div>
+                                        <ApplyButton
+                                            disabled={loading}
+                                            onClick={() => handleApplySingle(wipSprite)}
+                                        />
+                                    </div>
+                                </div>
                             }
                         </div>
                     ))}

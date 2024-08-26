@@ -1,37 +1,71 @@
-import React, { useState } from "react";
-import { ExportMod } from "../../../wailsjs/go/main/App";
-import { makeSortTypeFunc, nameFromId, toSorted } from "../../lib/utils";
+import React, { useEffect, useState } from "react";
 import usePagination from "../../hooks/usePagination";
-import { ESortType, ESpriteType } from "../../lib/types";
-import { ActionMenuProvider } from "../../contexts/ActionMenuContext";
+import { EActionMenuType, ESortType, ESpriteType } from "../../lib/types";
+import { useActionMenuContext } from "../../contexts/ActionMenuContext";
 import { useDataContext } from "../../contexts/DataContext";
-import Sprites from "./Sprites";
+import SpriteGroups from "./SpriteGroups";
+import { ExportMod } from "../../../wailsjs/go/main/App";
+import { toSorted } from "../../lib/utils";
+import { makeCompareFunc, monsterNameFromId } from "./sorting";
+import { main } from "../../../wailsjs/go/models";
+import { isMonsterGroup, TGroupMonstersData, toGroupMonstersData } from "./grouping";
+import GroupMonstersData from "./GroupMonstersData";
+import SpriteGroupData from "./SpriteGroupData";
+import { faPeopleGroup, faPerson, faUser, faUsers, IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const CARDS_PER_PAGE = 16;
 
+enum EViewType {
+    default = "default",
+    groupMonsters = "groupMonsters",
+}
+
 export default function ListPage() {
-    const { spritesTree } = useDataContext();
+    const { actionMenu, setActionMenu } = useActionMenuContext();
+    const { refreshAndFetchSpriteGroupData, spriteGroupData } = useDataContext();
+
+    useEffect(() => {
+        if (actionMenu === null) refreshAndFetchSpriteGroupData();
+    }, [actionMenu]);
 
     const [spriteType, setSpriteType] = useState<ESpriteType>(ESpriteType.battlesprites);
     const [query, setQuery] = useState("");
     const [sortType, setSortType] = useState<ESortType>(ESortType.idDesc);
+    const [viewType, setViewType] = useState<EViewType>(EViewType.default);
 
-    const ids = spriteType
-        ? Object.keys(spritesTree?.children[spriteType]?.spritesMap ?? {})
-            .filter(id => spriteType && query
-                ? nameFromId(id, spriteType).toLowerCase().includes(query.toLowerCase())
-                : true
-            ) ?? []
-        : [];
+    let spriteGroups = spriteGroupData?.data[spriteType] ?? [];
+    const groupMonstersData = spriteGroupData ? toGroupMonstersData(spriteGroupData) : null;
+    if (viewType === EViewType.groupMonsters && groupMonstersData) {
+        if (isMonsterGroup(spriteType)) {
+            spriteGroups = structuredClone(groupMonstersData.monsters);
+        }
+    }
 
-    const { Pagination, itemsOnCurrentPage, setCurrentPage } = usePagination(
-        toSorted(ids, makeSortTypeFunc(sortType, spriteType)),
-        CARDS_PER_PAGE
+    const filteredSpriteGroups = spriteGroups.filter(
+        spriteGroup => spriteType && query
+            ? monsterNameFromId(spriteGroup.id, spriteType).toLowerCase().includes(query.toLowerCase())
+            : true
     );
+    const sortedSpriteGroups = toSorted(filteredSpriteGroups, makeCompareFunc(sortType, spriteType));
 
-    function handleClick(_spriteType: ESpriteType) {
+    const {
+        Pagination,
+        itemsOnCurrentPage,
+        setCurrentPage
+    } = usePagination(sortedSpriteGroups, CARDS_PER_PAGE);
+
+    function handleDefaultClick(_spriteType: ESpriteType) {
         setSpriteType(_spriteType);
         setCurrentPage(1);
+    }
+
+    function handleMonsterGroupClick(key: keyof TGroupMonstersData) {
+        if (key in ESpriteType) {
+            setSpriteType(key as ESpriteType);
+        } else {
+            setSpriteType(ESpriteType.battlesprites);
+        }
     }
 
     function handleExport() {
@@ -39,17 +73,32 @@ export default function ListPage() {
     }
 
     return (
-        <ActionMenuProvider>
+        <>
             <div className="flex justify-center items-center gap-4 h-[50px] w-full bg-purple-200">
-                {spritesTree && Object.keys(spritesTree.children).map((_spriteType, index) => (
-                    <div
-                        key={index}
-                        className={(_spriteType === spriteType ? "bg-purple-300" : "bg-white") + " p-2 rounded cursor-pointer"}
-                        onClick={() => handleClick(_spriteType as ESpriteType)}
-                    >
-                        {_spriteType}
-                    </div>
-                ))}
+                <div className="flex justify-center items-center m-2 rounded-md border border-black overflow-hidden">
+                    {Object.keys(EViewType).map(_viewType => (
+                        <div
+                            key={_viewType}
+                            className={(_viewType === viewType ? "bg-blue-200" : "")
+                                + " h-full w-full p-2 border border-black cursor-pointer"}
+                            onClick={() => setViewType(_viewType as EViewType)}
+                        >
+                            <FontAwesomeIcon icon={viewTypeToIcon(_viewType as EViewType)} />
+                        </div>
+                    ))}
+                </div>
+                {viewType === EViewType.groupMonsters
+                    ? <GroupMonstersData
+                        groupMonstersData={groupMonstersData}
+                        spriteType={spriteType}
+                        onClick={key => handleMonsterGroupClick(key as keyof TGroupMonstersData)}
+                    />
+                    : <SpriteGroupData
+                        spriteGroupData={spriteGroupData}
+                        spriteType={spriteType}
+                        onClick={_spriteType => handleDefaultClick(_spriteType as ESpriteType)}
+                    />
+                }
                 <input
                     placeholder="Search"
                     className="px-2 py-1 rounded"
@@ -74,14 +123,25 @@ export default function ListPage() {
                     Export
                 </button>
             </div>
-            {spritesTree &&
-                <Sprites
-                    ids={itemsOnCurrentPage}
-                    spriteType={spriteType}
-                    spritesTree={spritesTree}
+            {spriteGroupData?.data &&
+                <SpriteGroups
+                    spriteGroups={itemsOnCurrentPage}
+                    onClick={spriteGroup => setActionMenu({
+                        type: EActionMenuType.spritesMapEditor,
+                        sprites: spriteGroup.sprites,
+                    })}
                 />
             }
             <Pagination />
-        </ActionMenuProvider>
+        </>
     )
 }
+
+function viewTypeToIcon(viewType: EViewType): IconDefinition {
+    return viewTypeIconsRecord[viewType];
+}
+
+const viewTypeIconsRecord: Record<EViewType, IconDefinition> = {
+    [EViewType.default]: faUser,
+    [EViewType.groupMonsters]: faUsers,
+};

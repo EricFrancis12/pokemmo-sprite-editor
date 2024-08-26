@@ -13,7 +13,7 @@ export default function ActionMenu({ actionMenu, setActionMenu }: {
                 title={actionMenu.type}
                 onClose={() => setActionMenu(null)}
             />
-            <div className="max-h-[85vh] w-[85vw] sm:min-w-[400px] overflow-y-scroll">
+            <div className="h-[85vh] w-[85vw] sm:min-w-[400px] overflow-y-scroll">
                 <ActionMenuBody actionMenu={actionMenu} setActionMenu={setActionMenu} />
             </div>
         </div>

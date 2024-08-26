@@ -12,8 +12,8 @@ import (
 	"github.com/anthonynsimon/bild/adjust"
 )
 
-func ProcessPng(inputPath string, outputPath string, imageData ImageData) error {
-	file, err := os.Open(inputPath)
+func processPNG(inputFs FileSystem, inputPath string, outputPath string, imageData ImageData) error {
+	file, err := inputFs.Open(inputPath)
 	if err != nil {
 		return err
 	}
@@ -40,8 +40,8 @@ func ProcessPng(inputPath string, outputPath string, imageData ImageData) error 
 	return png.Encode(outputFile, img)
 }
 
-func ProcessGif(inputPath string, outputPath string, imageData ImageData) error {
-	file, err := os.Open(inputPath)
+func processGIF(inputFs FileSystem, inputPath string, outputPath string, imageData ImageData) error {
+	file, err := inputFs.Open(inputPath)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,6 @@ func saveToStorage(outputPath string, imageData ImageData) error {
 		Hue:        imageData.Hue,
 		Saturation: imageData.Saturation,
 	}
-	storage.UpsertOne(i)
 	if err := storage.UpsertOne(i); err != nil {
 		return err
 	}

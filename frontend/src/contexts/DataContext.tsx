@@ -1,11 +1,21 @@
 import React, { useState, useContext, useEffect } from "react";
 import { main } from "../../wailsjs/go/models";
-import { SpritesTree } from "../../wailsjs/go/main/App";
+import { GetSpriteData, GetSpriteGroupData } from "../../wailsjs/go/main/App";
 
 export type TDataContext = {
-    fetchData: () => Promise<main.Tree>;
-    spritesTree: main.Tree | null;
-    setSpritesTree: React.Dispatch<React.SetStateAction<main.Tree | null>>;
+    fetchData: () => Promise<[main.SpriteData, main.SpriteGroupData]>;
+    refreshAndFetchData: () => Promise<[main.SpriteData, main.SpriteGroupData]>;
+
+    fetchSpriteData: () => Promise<main.SpriteData>;
+    refreshAndFetchSpriteData: () => Promise<main.SpriteData>;
+    spriteData: main.SpriteData | null;
+    setSpriteData: React.Dispatch<React.SetStateAction<main.SpriteData | null>>;
+
+    fetchSpriteGroupData: () => Promise<main.SpriteGroupData>;
+    refreshAndFetchSpriteGroupData: () => Promise<main.SpriteGroupData>;
+    spriteGroupData: main.SpriteGroupData | null;
+    setSpriteGroupData: React.Dispatch<React.SetStateAction<main.SpriteGroupData | null>>;
+
 };
 
 const DataContext = React.createContext<TDataContext | null>(null);
@@ -21,12 +31,43 @@ export function useDataContext() {
 export function DataProvider({ children }: {
     children: React.ReactNode;
 }) {
-    const [spritesTree, setSpritesTree] = useState<main.Tree | null>(null);
+    const [spriteData, setSpriteData] = useState<main.SpriteData | null>(null);
+    const [spriteGroupData, setSpriteGroupData] = useState<main.SpriteGroupData | null>(null);
+
+    async function fetchSpriteData() {
+        const prom = GetSpriteData();
+        prom.then(setSpriteData);
+        return prom;
+    }
+
+    async function fetchSpriteGroupData() {
+        const prom = GetSpriteGroupData();
+        prom.then(setSpriteGroupData);
+        return prom;
+    }
 
     async function fetchData() {
-        const prom = SpritesTree();
-        prom.then(setSpritesTree);
-        return prom;
+        return Promise.all([
+            fetchSpriteData(),
+            fetchSpriteGroupData(),
+        ]);
+    }
+
+    async function refreshAndFetchSpriteData() {
+        setSpriteData(null);
+        return fetchSpriteData();
+    }
+
+    async function refreshAndFetchSpriteGroupData() {
+        setSpriteGroupData(null);
+        return fetchSpriteGroupData();
+    }
+
+    async function refreshAndFetchData() {
+        return Promise.all([
+            refreshAndFetchSpriteData(),
+            refreshAndFetchSpriteGroupData(),
+        ]);
     }
 
     useEffect(() => {
@@ -35,8 +76,17 @@ export function DataProvider({ children }: {
 
     const value = {
         fetchData,
-        spritesTree,
-        setSpritesTree,
+        refreshAndFetchData,
+
+        fetchSpriteData,
+        refreshAndFetchSpriteData,
+        spriteData,
+        setSpriteData,
+
+        fetchSpriteGroupData,
+        refreshAndFetchSpriteGroupData,
+        spriteGroupData,
+        setSpriteGroupData,
     };
 
     return (
