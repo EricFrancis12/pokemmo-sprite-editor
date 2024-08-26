@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 import { main } from "../../wailsjs/go/models";
 import { GetSpriteData, GetSpriteGroupData } from "../../wailsjs/go/main/App";
+import toast from "react-hot-toast";
+import { formatErr } from "../lib/utils";
 
 export type TDataContext = {
     fetchData: () => Promise<[main.SpriteData, main.SpriteGroupData]>;
@@ -37,12 +39,14 @@ export function DataProvider({ children }: {
     async function fetchSpriteData() {
         const prom = GetSpriteData();
         prom.then(setSpriteData);
+        prom.catch(err => toast.error(formatErr(err).message));
         return prom;
     }
 
     async function fetchSpriteGroupData() {
         const prom = GetSpriteGroupData();
         prom.then(setSpriteGroupData);
+        prom.catch(err => toast.error(formatErr(err).message));
         return prom;
     }
 

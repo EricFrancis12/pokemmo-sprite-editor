@@ -9,6 +9,8 @@ import { useEditModeContext } from "../../../contexts/EditModeContext";
 import ColorEditor from "../../ColorEditor";
 import { ApplyButton } from "../../buttons";
 import SpriteStats from "../../SpriteStats";
+import toast from "react-hot-toast";
+import { formatErr } from "../../../lib/utils";
 
 type WIPSprite = main.Sprite & {
     wipImageData: main.ImageData;
@@ -45,17 +47,27 @@ export default function SpritesMapEditorBody({ actionMenu }: {
     function handleApplySingle(wipSprite: WIPSprite) {
         if (editMode !== EEditMode.single) return;
         setLoading(true);
-        ProcessSprite(wipSprite, wipSprite.wipImageData).then(refreshSingle);
+        ProcessSprite(wipSprite, wipSprite.wipImageData)
+            .then(() => refreshSingle().then(() => toast.success("Updated Sprite")))
+            .catch(err => {
+                toast.error(formatErr(err).message);
+                setLoading(false);
+            });
     }
 
     function handleApplyAll() {
         if (editMode !== EEditMode.all) return;
         setLoading(true);
-        ProcessSprites(actionMenu.sprites, imageData).then(refreshAll);
+        ProcessSprites(actionMenu.sprites, imageData)
+            .then(() => refreshAll().then(() => toast.success("Updated Sprites")))
+            .catch(err => {
+                toast.error(formatErr(err).message);
+                setLoading(false);
+            });
     }
 
-    function refreshSingle() {
-        fetchData().then(() => setTimeout(() => {
+    async function refreshSingle() {
+        return fetchData().then(() => setTimeout(() => {
             const prev = wipSprites;
             setWipSprites([]);
             setTimeout(() => {
@@ -65,8 +77,8 @@ export default function SpritesMapEditorBody({ actionMenu }: {
         }, 0));
     }
 
-    function refreshAll() {
-        fetchData().then(() => setTimeout(() => {
+    async function refreshAll() {
+        return fetchData().then(() => setTimeout(() => {
             const prev = wipSprites;
             setWipSprites([]);
             setTimeout(() => {

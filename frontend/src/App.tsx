@@ -4,10 +4,12 @@ import ListPage from "./pages/ListPage";
 import { ActionMenuProvider } from "./contexts/ActionMenuContext";
 import { DataProvider } from "./contexts/DataContext";
 import { EditModeProvider } from "./contexts/EditModeContext";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
     return (
         <AppContextProvider>
+            <Toaster />
             <Router>
                 <Routes>
                     <Route index element={<ListPage />} />
