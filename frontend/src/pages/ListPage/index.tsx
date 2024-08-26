@@ -13,7 +13,7 @@ import GroupMonstersData from "./GroupMonstersData";
 import SpriteGroupData from "./SpriteGroupData";
 import { faUser, faUsers, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { itemsDict, monstersDict } from "../../lib/constants";
+import { monstersDict } from "../../lib/constants";
 
 const CARDS_PER_PAGE = 16;
 
@@ -51,9 +51,9 @@ export default function ListPage() {
     const sortedSpriteGroups = toSorted(filteredSpriteGroups, makeCompareFunc(sortType, spriteType));
 
     const {
+        itemsOnCurrentPage: spriteGroupsOnCurrentPage,
+        setCurrentPage,
         Pagination,
-        itemsOnCurrentPage,
-        setCurrentPage
     } = usePagination(sortedSpriteGroups, CARDS_PER_PAGE);
 
     function handleDefaultClick(_spriteType: ESpriteType) {
@@ -67,6 +67,11 @@ export default function ListPage() {
         } else {
             setSpriteType(ESpriteType.battlesprites);
         }
+    }
+
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setQuery(e.target.value);
+        setCurrentPage(1);
     }
 
     function handleExport() {
@@ -107,7 +112,7 @@ export default function ListPage() {
                         placeholder="Search"
                         className="px-2 py-1 rounded"
                         value={query}
-                        onChange={e => setQuery(e.target.value)}
+                        onChange={handleInputChange}
                     />
                     <select
                         className="px-2 py-1 rounded"
@@ -115,7 +120,7 @@ export default function ListPage() {
                         onChange={e => setSortType(e.target.value as ESortType)}
                     >
                         {Object.values(ESortType).map((_sortType, index) => (
-                            <option key={index}>
+                            <option key={index} value={_sortType}>
                                 {sortTypeText(_sortType as ESortType)}
                             </option>
                         ))}
@@ -130,7 +135,7 @@ export default function ListPage() {
             </div>
             {spriteGroupData?.data &&
                 <SpriteGroups
-                    spriteGroups={itemsOnCurrentPage}
+                    spriteGroups={spriteGroupsOnCurrentPage}
                     onClick={spriteGroup => setActionMenu({
                         title: actionMenuTitle(spriteGroup, spriteType, viewType),
                         type: EActionMenuType.spritesMapEditor,
@@ -149,7 +154,7 @@ function actionMenuTitle(spriteGroup: main.SpriteGroup, spriteType: ESpriteType,
     let title = "";
 
     if (spriteType === ESpriteType.itemicons) {
-        title += itemsDict[spriteGroup.id];
+        title += "Item " + spriteGroup.id;
     } else {
         title += monstersDict[spriteGroup.id];
     }

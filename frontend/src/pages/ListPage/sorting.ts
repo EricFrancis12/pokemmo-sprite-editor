@@ -1,4 +1,4 @@
-import { itemsDict, monstersDict } from "../../lib/constants";
+import { monstersDict } from "../../lib/constants";
 import { main } from "../../../wailsjs/go/models";
 import { ESortType, ESpriteType } from "../../lib/types";
 
@@ -24,24 +24,16 @@ export function monsterNameFromId(id: string, spriteType: ESpriteType): string {
 type SpriteTypeMatcherFunc = (id: string) => string;
 
 const spriteTypesRecord: Record<ESpriteType, SpriteTypeMatcherFunc> = {
-    [ESpriteType.battlesprites]: battlespritesMatcher,
-    [ESpriteType.followsprites]: followspritesMatcher,
-    [ESpriteType.itemicons]: itemiconsMatcher,
-    [ESpriteType.monstericons]: monstericonsMatcher,
+    [ESpriteType.battlesprites]: monstersMatcher,
+    [ESpriteType.followsprites]: monstersMatcher,
+    [ESpriteType.itemicons]: itemsMatcher,
+    [ESpriteType.monstericons]: monstersMatcher,
 };
 
-function battlespritesMatcher(id: string): string {
+function monstersMatcher(id: string): string {
     return monstersDict[id] ?? "";
 }
 
-function followspritesMatcher(id: string): string {
-    return monstersDict[id] ?? "";
-}
-
-function itemiconsMatcher(id: string): string {
-    return itemsDict[id] ?? "";
-}
-
-function monstericonsMatcher(id: string): string {
-    return monstersDict[id] ?? "";
+function itemsMatcher(id: string): string {
+    return id;
 }
