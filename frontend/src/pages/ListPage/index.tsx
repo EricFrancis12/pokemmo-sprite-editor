@@ -148,10 +148,6 @@ export default function ListPage() {
 function actionMenuTitle(spriteGroup: main.SpriteGroup, spriteType: ESpriteType, viewType: EViewType): string {
     let title = "";
 
-    console.log(spriteGroup);
-    console.log(itemsDict);
-    console.log(itemsDict[spriteGroup.id]);
-
     if (spriteType === ESpriteType.itemicons) {
         title += itemsDict[spriteGroup.id];
     } else {
