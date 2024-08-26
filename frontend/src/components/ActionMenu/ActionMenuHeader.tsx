@@ -7,7 +7,7 @@ export default function ActionMenuHeader({ title, onClose }: {
     onClose: React.MouseEventHandler<HTMLOrSVGElement>;
 }) {
     return (
-        <div className="flex justify-between items-center w-full p-4 px-6 bg-[#1f76c6] rounded-t-md">
+        <div className="flex justify-between items-center w-full p-4 px-6 bg-blue-400 rounded-t-md">
             <div className="flex justify-center items-center">
                 {title}
             </div>

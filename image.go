@@ -58,7 +58,7 @@ func processGIF(inputFs FileSystem, inputPath string, outputPath string, imageDa
 	for i, img := range gifImage.Image {
 		// Get bounds from the first frame
 		if i == 0 {
-			bounds = img.Bounds()
+			bounds = img.Rect
 		}
 
 		// Convert *image.Paletted to *image.RGBA
@@ -69,7 +69,7 @@ func processGIF(inputFs FileSystem, inputPath string, outputPath string, imageDa
 		rgba = adjust.Saturation(rgba, imageData.Saturation)
 
 		// Convert *image.RGBA to *image.Paletted
-		gifImage.Image[i] = RGBAToPaletted(rgba, bounds)
+		gifImage.Image[i] = RGBAToPaletted(rgba, img.Bounds())
 	}
 
 	outputFile, err := os.Create(outputPath)
@@ -124,6 +124,6 @@ func RGBAToPaletted(rgba *image.RGBA, bounds image.Rectangle) *image.Paletted {
 
 	// Create the Paletted image with the constructed palette
 	paletted := image.NewPaletted(bounds, palette)
-	draw.Draw(paletted, bounds, rgba, image.Point{}, draw.Over)
+	draw.Draw(paletted, rgba.Bounds(), rgba, image.Point{}, draw.Over)
 	return paletted
 }
