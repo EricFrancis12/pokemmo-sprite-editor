@@ -15,7 +15,7 @@ export default function GroupMonstersData({ groupMonstersData, spriteType, onCli
                         (key as ESpriteType === spriteType
                             || (isMonsterGroup(spriteType) && key as keyof typeof groupMonstersData === "monsters")
                         ) ? "bg-purple-300"
-                            : "bg-white"
+                            : "bg-white hover:opacity-70"
                     ) + " p-2 rounded cursor-pointer"}
                     onClick={() => onClick(key as keyof TGroupMonstersData)}
                 >

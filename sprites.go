@@ -95,7 +95,8 @@ func getSpritesByType(st SpriteType) ([]Sprite, error) {
 }
 
 func spriteIdFromFileName(fileName string) string {
-	return strings.Split(fileName, "-")[0]
+	parts := strings.Split(fileName, ".")
+	return strings.Split(parts[0], "-")[0]
 }
 
 func isSpriteFile(name string) bool {

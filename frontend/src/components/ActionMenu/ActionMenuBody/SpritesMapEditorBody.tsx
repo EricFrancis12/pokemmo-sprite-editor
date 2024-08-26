@@ -8,6 +8,7 @@ import { EEditMode } from "../../../lib/types";
 import { useEditModeContext } from "../../../contexts/EditModeContext";
 import ColorEditor from "../../ColorEditor";
 import { ApplyButton } from "../../buttons";
+import SpriteStats from "../../SpriteStats";
 
 type WIPSprite = main.Sprite & {
     wipImageData: main.ImageData;
@@ -106,8 +107,13 @@ export default function SpritesMapEditorBody({ actionMenu }: {
                 }
                 <div className="grid grid-cols-2 gap-4 w-full">
                     {wipSprites.map((wipSprite, index) => (
-                        <div key={wipSprite.fileName}>
-                            <img src={wipSprite.url} className="m-4" />
+                        <div key={wipSprite.fileName} className="px-4 py-2 border border-black rounded-md">
+                            <div className="flex gap-2">
+                                <div className="flex justify-center items-center">
+                                    <img src={wipSprite.url} className="m-4" />
+                                </div>
+                                <SpriteStats sprite={wipSprite} />
+                            </div>
                             {editMode === EEditMode.single &&
                                 <div className="flex gap-3">
                                     <ColorEditor

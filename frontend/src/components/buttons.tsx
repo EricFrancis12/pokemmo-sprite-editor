@@ -8,7 +8,7 @@ export function BaseButton({ title, onClick, disabled, className = "" }: {
 }) {
     return (
         <button
-            className={"px-2 py-1 rounded " + className}
+            className={"px-2 py-2 rounded hover:opacity-70 " + className}
             disabled={disabled}
             onClick={onClick}
         >

@@ -1,4 +1,4 @@
-import { itemsDict, pokemonDict } from "../../lib/constants";
+import { itemsDict, monstersDict } from "../../lib/constants";
 import { main } from "../../../wailsjs/go/models";
 import { ESortType, ESpriteType } from "../../lib/types";
 
@@ -31,11 +31,11 @@ const spriteTypesRecord: Record<ESpriteType, SpriteTypeMatcherFunc> = {
 };
 
 function battlespritesMatcher(id: string): string {
-    return pokemonDict[id] ?? "";
+    return monstersDict[id] ?? "";
 }
 
 function followspritesMatcher(id: string): string {
-    return pokemonDict[id] ?? "";
+    return monstersDict[id] ?? "";
 }
 
 function itemiconsMatcher(id: string): string {
@@ -43,5 +43,5 @@ function itemiconsMatcher(id: string): string {
 }
 
 function monstericonsMatcher(id: string): string {
-    return pokemonDict[id] ?? "";
+    return monstersDict[id] ?? "";
 }

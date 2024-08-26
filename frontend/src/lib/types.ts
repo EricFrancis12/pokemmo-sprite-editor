@@ -9,7 +9,9 @@ export type TActionMenu_spritesMapEditor = {
     sprites: main.Sprite[];
 }
 
-export type TActionMenu = TActionMenu_spritesMapEditor;
+export type TActionMenu = {
+    title: string;
+} & TActionMenu_spritesMapEditor;
 
 export enum EEditMode {
     all = "all",
@@ -29,3 +31,26 @@ export enum ESpriteType {
     itemicons = "itemicons",
     monstericons = "monstericons",
 }
+
+export enum EFacing {
+    front = "front",
+    back = "back",
+}
+
+export enum EShiny {
+    normal = "n",
+    shiny = "s",
+}
+
+export enum EGender {
+    female = "f",
+    male = "m",
+    both = "b",
+}
+
+export type SpriteData = {
+    gender: EGender | null;
+    shiny: EShiny | null;
+    facing: EFacing | null;
+    frame: number | null;
+};

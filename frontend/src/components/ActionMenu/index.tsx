@@ -10,12 +10,13 @@ export default function ActionMenu({ actionMenu, setActionMenu }: {
     return (
         <div className="flex flex-col items-center bg-white rounded-md">
             <ActionMenuHeader
-                title={actionMenu.type}
+                title={actionMenu.title}
                 onClose={() => setActionMenu(null)}
             />
             <div className="h-[85vh] w-[85vw] sm:min-w-[400px] overflow-y-scroll">
                 <ActionMenuBody actionMenu={actionMenu} setActionMenu={setActionMenu} />
             </div>
+            <div className="h-[20px] w-full" />
         </div>
     )
 }

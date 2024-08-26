@@ -15,26 +15,29 @@ export default function usePagination<T>(items: T[], itemsPerPage: number) {
     );
 
     function handleClick(pgn: TPagination) {
-        if (typeof pgn === 'number') {
+        if (typeof pgn === "number") {
             setCurrentPage(pgn);
-        } else if (pgn === '<<') {
+        } else if (pgn === "<<") {
             setCurrentPage(1);
-        } else if (pgn === '<') {
+        } else if (pgn === "<") {
             const newCurrentPage = currentPage - 1 > 0 ? currentPage - 1 : 1;
             setCurrentPage(newCurrentPage);
-        } else if (pgn === '>') {
+        } else if (pgn === ">") {
             const newCurrentPage = currentPage + 1 <= totalPages ? currentPage + 1 : totalPages;
             setCurrentPage(newCurrentPage);
-        } else if (pgn === '>>') {
+        } else if (pgn === ">>") {
             setCurrentPage(totalPages);
         }
     }
 
-    function _Pagination() {
+    function _Pagination({ className }: {
+        className?: string;
+    }) {
         return (
             <Pagination
                 pagination={pagination}
                 currentPage={currentPage}
+                className={className}
                 onClick={handleClick}
             />
         )
