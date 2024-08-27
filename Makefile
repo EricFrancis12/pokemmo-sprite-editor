@@ -1,3 +1,6 @@
+install:
+	cd frontend && npm install
+
 dev:
 	wails dev
 
