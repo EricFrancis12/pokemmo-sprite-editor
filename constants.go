@@ -15,7 +15,7 @@ const fileMode fs.FileMode = fs.ModePerm
 const (
 	imageDataTableName      string = "IMAGE_DATA"
 	imageDataDriverName     string = "sqlite3"
-	imageDataDataSourceName string = "./data.db"
+	imageDataDataSourceName string = "./pokemmo-sprite-editor-data.db"
 )
 
 const (

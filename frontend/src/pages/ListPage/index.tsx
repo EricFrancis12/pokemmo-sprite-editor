@@ -5,7 +5,7 @@ import { useActionMenuContext } from "../../contexts/ActionMenuContext";
 import { useDataContext } from "../../contexts/DataContext";
 import SpriteGroups from "./SpriteGroups";
 import { ExportMod } from "../../../wailsjs/go/main/App";
-import { toSorted, uppercaseFirstLetter } from "../../lib/utils";
+import { formatErr, toSorted, uppercaseFirstLetter } from "../../lib/utils";
 import { makeCompareFunc, monsterNameFromId } from "./sorting";
 import { main } from "../../../wailsjs/go/models";
 import { isMonsterGroup, TGroupMonstersData, toGroupMonstersData } from "./grouping";
@@ -14,6 +14,7 @@ import SpriteGroupData from "./SpriteGroupData";
 import { faUser, faUsers, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { monstersDict } from "../../lib/constants";
+import toast from "react-hot-toast";
 
 const CARDS_PER_PAGE = 16;
 
@@ -34,6 +35,7 @@ export default function ListPage() {
     const [query, setQuery] = useState("");
     const [sortType, setSortType] = useState<ESortType>(ESortType.idDesc);
     const [viewType, setViewType] = useState<EViewType>(EViewType.default);
+    const [loading, setLoading] = useState(false);
 
     let spriteGroups = spriteGroupData?.data[spriteType] ?? [];
     const groupMonstersData = spriteGroupData ? toGroupMonstersData(spriteGroupData) : null;
@@ -75,7 +77,12 @@ export default function ListPage() {
     }
 
     function handleExport() {
-        ExportMod();
+        if (loading) return;
+        setLoading(true);
+        ExportMod()
+            .then(() => toast.success("Mod exported successfully"))
+            .catch(err => toast.error(formatErr(err).message))
+            .finally(() => setLoading(false));
     }
 
     return (
@@ -126,14 +133,16 @@ export default function ListPage() {
                         ))}
                     </select>
                     <button
-                        className="px-3 py-2 bg-orange-300 rounded hover:opacity-70"
+                        className={(loading ? "opacity-50" : "hover:opacity-70") + " px-3 py-2 bg-orange-300 rounded"}
+                        disabled={loading}
                         onClick={handleExport}
                     >
                         Export
                     </button>
                 </div>
             </div>
-            {spriteGroupData?.data &&
+            {
+                spriteGroupData?.data &&
                 <SpriteGroups
                     spriteGroups={spriteGroupsOnCurrentPage}
                     onClick={spriteGroup => setActionMenu({
@@ -146,7 +155,7 @@ export default function ListPage() {
             <div className="flex justify-center items-center mx-4 mt-2 px-4 py-2 border border-slate-400 rounded-lg">
                 <Pagination className="text-slate-400" />
             </div>
-        </div>
+        </div >
     )
 }
 
