@@ -18,6 +18,7 @@ export type TDataContext = {
     spriteGroupData: main.SpriteGroupData | null;
     setSpriteGroupData: React.Dispatch<React.SetStateAction<main.SpriteGroupData | null>>;
 
+    loadingData: boolean;
 };
 
 const DataContext = React.createContext<TDataContext | null>(null);
@@ -35,18 +36,23 @@ export function DataProvider({ children }: {
 }) {
     const [spriteData, setSpriteData] = useState<main.SpriteData | null>(null);
     const [spriteGroupData, setSpriteGroupData] = useState<main.SpriteGroupData | null>(null);
+    const [loadingData, setLoadingData] = useState(false);
 
     async function fetchSpriteData() {
+        setLoadingData(true);
         const prom = GetSpriteData();
         prom.then(setSpriteData);
         prom.catch(err => toast.error(formatErr(err).message));
+        prom.finally(() => setLoadingData(false));
         return prom;
     }
 
     async function fetchSpriteGroupData() {
+        setLoadingData(true);
         const prom = GetSpriteGroupData();
         prom.then(setSpriteGroupData);
         prom.catch(err => toast.error(formatErr(err).message));
+        prom.finally(() => setLoadingData(false));
         return prom;
     }
 
@@ -91,6 +97,8 @@ export function DataProvider({ children }: {
         refreshAndFetchSpriteGroupData,
         spriteGroupData,
         setSpriteGroupData,
+
+        loadingData,
     };
 
     return (

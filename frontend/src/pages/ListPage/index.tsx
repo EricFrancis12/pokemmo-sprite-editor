@@ -25,7 +25,7 @@ enum EViewType {
 
 export default function ListPage() {
     const { actionMenu, setActionMenu } = useActionMenuContext();
-    const { refreshAndFetchSpriteGroupData, spriteGroupData } = useDataContext();
+    const { refreshAndFetchSpriteGroupData, spriteGroupData, loadingData } = useDataContext();
 
     useEffect(() => {
         if (actionMenu === null) refreshAndFetchSpriteGroupData();
@@ -141,21 +141,23 @@ export default function ListPage() {
                     </button>
                 </div>
             </div>
-            {
-                spriteGroupData?.data &&
-                <SpriteGroups
-                    spriteGroups={spriteGroupsOnCurrentPage}
-                    onClick={spriteGroup => setActionMenu({
-                        title: actionMenuTitle(spriteGroup, spriteType, viewType),
-                        type: EActionMenuType.spritesMapEditor,
-                        sprites: spriteGroup.sprites,
-                    })}
-                />
+            {loadingData
+                ? <div className="text-center h-[50px] w-full py-2 text-white">Loading Sprites...</div>
+                : spriteGroupData?.data
+                    ? <SpriteGroups
+                        spriteGroups={spriteGroupsOnCurrentPage}
+                        onClick={spriteGroup => setActionMenu({
+                            title: actionMenuTitle(spriteGroup, spriteType, viewType),
+                            type: EActionMenuType.spritesMapEditor,
+                            sprites: spriteGroup.sprites,
+                        })}
+                    />
+                    : ""
             }
             <div className="flex justify-center items-center mx-4 mt-2 px-4 py-2 border border-slate-400 rounded-lg">
                 <Pagination className="text-slate-400" />
             </div>
-        </div >
+        </div>
     )
 }
 
