@@ -1,5 +1,5 @@
 # PokeMMO Sprite Editor
-A tool that allows players to recolor PokeMMO sprites, and export them as a mod file for use in game. Built with [Wails](https://wails.io/).
+A tool that allows players to recolor [PokeMMO](https://pokemmo.com/) sprites, and export them as a mod file for use in game. Built with [Wails](https://wails.io/).
 
 ## Features
 
