@@ -15,6 +15,7 @@ import { faUser, faUsers, IconDefinition } from "@fortawesome/free-solid-svg-ico
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { monstersDict } from "../../lib/constants";
 import toast from "react-hot-toast";
+import DefaultLayout from "../../layouts/DefaultLayout";
 
 const CARDS_PER_PAGE = 16;
 
@@ -86,7 +87,7 @@ export default function ListPage() {
     }
 
     return (
-        <div>
+        <DefaultLayout>
             <div className="flex justify-between items-center gap-4 h-[50px] w-full px-4 bg-purple-200">
                 <div className="flex items-center gap-4 h-full w-full">
                     <div className="flex justify-center items-center rounded-md border border-black overflow-hidden">
@@ -157,7 +158,7 @@ export default function ListPage() {
             <div className="flex justify-center items-center mx-4 mt-2 px-4 py-2 border border-slate-400 rounded-lg">
                 <Pagination className="text-slate-400" />
             </div>
-        </div>
+        </DefaultLayout>
     )
 }
 
