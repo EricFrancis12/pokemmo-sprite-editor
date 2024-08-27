@@ -44,5 +44,5 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts-${{ matrix.build.platform }}
+          name: build-artifacts-${{ matrix.build.os }}
           path: build/bin
