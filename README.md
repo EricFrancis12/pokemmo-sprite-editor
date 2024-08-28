@@ -38,11 +38,11 @@ wails build
 ```
 This will create an executable located at `/build/bin/pokemmo-sprite-editor.exe`.
 
-## Running the program
+## Usage
 Run the executable to start the program. Alternitively, you can run `make run` at the project root.
 
 ## File and Directories
-On startup, the program will create these files and directories inside of the directory it is currently running in if they do not already exists:
+On startup, the program will create these files and directories inside the directory it's currently running in if they do not already exist:
 
 ```base
 
@@ -58,7 +58,7 @@ On startup, the program will create these files and directories inside of the di
 ```
 
 1. `mod/`: The directory where the mod file (`pokemmo-sprite-editor.zip`) will be exported to.
-2. `modded-sprites/`: The program saves relolored sprites in this directory. The mod file is built from these sprites.
+2. `modded-sprites/`: The program saves recolored sprites in this directory. The mod file is built from these sprites.
 3. `pokemmo-sprite-editor-data.db`: A SQLite file that stores application data.
 
 ## Find a bug?
