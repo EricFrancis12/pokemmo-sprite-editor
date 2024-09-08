@@ -2,11 +2,13 @@
 A tool that allows players to recolor [PokeMMO](https://pokemmo.com/) sprites, and export them as a mod file for use in game. Built with [Wails](https://wails.io/).
 
 ## Features
-
 - **Edit Sprites**: Edit monster sprites from PokeMMO.
 - **Preview Changes**: View your modifications in real-time.
 - **Export Mod Files**: Export your edited sprites into a .zip file compatible with PokeMMO.
 - **Multiple Sprite Types**: Support for various sprite types used in PokeMMO (battlesprites, followersprites, moonstericons, and itemicons).
+
+## Video Demo
+https://www.youtube.com/watch?v=PPGgfiTe9o0
 
 ## Build
 
